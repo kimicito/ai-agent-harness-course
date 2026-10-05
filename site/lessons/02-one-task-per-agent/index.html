@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>2.4 · Один агент — одна задача — ИИ-агенты на практике</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+  :root { --bg: #0B0F19; --card: #111827; --text: #F3F4F6; --muted: #9CA3AF; --accent: #8B5CF6; --accent2: #06B6D4; --border: rgba(255,255,255,0.08); --success: #10B981; --warning: #F59E0B; --danger: #EF4444; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; margin: 0; overflow-x: hidden; }
+  .container { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+  header { padding: 16px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  .lesson-header { padding: 32px 0 16px; }
+  .lesson-header .phase { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+  .lesson-header h1 { margin: 8px 0; font-size: 1.8rem; line-height: 1.25; }
+  .lesson-header .meta { color: var(--muted); font-size: 0.9rem; }
+  .section { margin: 28px 0; }
+  .section h2 { color: var(--accent); font-size: 1.2rem; margin-bottom: 12px; }
+  .section h3 { color: var(--accent2); font-size: 1.05rem; margin: 20px 0 10px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 14px 0; }
+  .card-accent { border-left: 4px solid var(--accent); }
+  .card-success { border-left: 4px solid var(--success); }
+  .card-warning { border-left: 4px solid var(--warning); }
+  .highlight { background: rgba(139,92,246,0.1); padding: 2px 6px; border-radius: 4px; }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 8px 0; padding-left: 28px; position: relative; }
+  .checklist li:before { content: "☐"; position: absolute; left: 0; color: var(--accent); }
+  .example { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); border-radius: 8px; padding: 14px; margin: 12px 0; }
+  .example-label { color: var(--accent2); font-size: 0.75rem; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .nav-footer { display: flex; justify-content: space-between; padding: 32px 0; border-top: 1px solid var(--border); margin-top: 32px; flex-wrap: wrap; gap: 8px; }
+  .nav-btn { padding: 10px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); text-decoration: none; transition: all 0.2s; }
+  .nav-btn:hover { border-color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); border-color: var(--accent); }
+  footer { padding: 32px 16px; text-align: center; color: var(--muted); border-top: 1px solid var(--border); }
+  .card + .card { margin-top: 40px; }
+  .quiz-option + .quiz-option { margin-top: 8px; }
+  .card-accent:has(.quiz-option) { border-left: none; border-top: 3px solid var(--accent); }
+  .quiz-option { display: block; word-wrap: break-word; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; cursor: pointer; transition: all 0.2s; }
+  .quiz-option:hover { border-color: var(--accent); }
+  .quiz-option.correct { border-color: var(--success); background: rgba(16,185,129,0.1); }
+  .quiz-option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.1); }
+  .quiz-option.disabled { opacity: 0.5; pointer-events: none; }
+  .result { display: none; padding: 16px; border-radius: 8px; margin: 16px 0; }
+  .result.show { display: block; }
+  pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; }
+  ul, ol { padding-left: 20px; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.9rem; }
+  th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--accent); font-weight: 600; }
+  .compare-box { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  .compare-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  @media (max-width: 768px) {
+    .lesson-header h1 { font-size: 1.4rem; }
+    .compare-box { grid-template-columns: 1fr; }
+    .nav-footer { flex-direction: column; }
+    .nav-btn { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <a href="../../index.html" class="logo">🧠 ИИ-агенты на практике</a>
+    <a href="../../catalog.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">← Каталог</a> <span style="color: var(--border); margin: 0 8px;">|</span> <a href="../../glossary.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">📖 Термины</a>
+  </div>
+</header>
+
+<article class="container">
+
+  <div class="lesson-header">
+    <div class="phase">🧭 УРОВЕНЬ 2 · ЗАДАЧА КАК ДОГОВОР</div>
+    <h1>2.4 · Один агент — одна задача</h1>
+    <div class="meta">🎯 Без кода · ✅ Интерактивный квиз · ⏱️ ~10 минут</div>
+  </div>
+
+  <!-- ЗАЧЕМ -->
+  <div class="section">
+    <h2>🎯 Зачем это бизнесу</h2>
+    <p>Договор задачи готов: есть предусловие, постусловие, инварианты. Остался один соблазн, который ломает всё сразу: «А давай за один раз — сравни цены, напиши письмо поставщику и подготовь презентацию для руководства». Экономия на бумаге, убыток в работе.</p>
+    <p>Правило называется коротко: <span class="highlight">одна задача до готовности</span>. В инженерных текстах — WIP = 1 (work in progress, «в работе — одна»). Смысл один: следующая задача начинается после приёмки предыдущей.</p>
+  </div>
+
+  <!-- ЧТО ИЗУЧАЕМ -->
+  <div class="section">
+    <h2>📚 Что изучаем</h2>
+
+    <h3>Почему «всё сразу» режет качество каждой части</h3>
+    <div class="card">
+      <table>
+        <tr><th>Что происходит</th><th>Следствие</th></tr>
+        <tr><td>Контекст размывается между тремя задачами</td><td>Цифры из сравнения цен «просачиваются» в письмо; постусловия путаются</td></tr>
+        <tr><td>Ошибка в первой части сыплется в остальные</td><td>Неверная цена доезжает до презентации для руководства</td></tr>
+        <tr><td>Не проверить часть отдельно</td><td>Нет базовой линии: результат — комок из трёх «почти готово»</td></tr>
+        <tr><td>«Готово» становится неопределённым</td><td>Вернуться к уроку 0: слово вместо факта — но уже на уровне задач</td></tr>
+      </table>
+    </div>
+    <p>С людьми то же самое — но агент делает это быстрее и увереннее. Параллельные задачи для него не страховка, а три источника уверенных ошибок.</p>
+
+    <h3>Симптомы перегруженного агента</h3>
+    <div class="card card-warning">
+      <ul>
+        <li>Результат «почти весь»: 8 из 10 позиций, два текста из трёх</li>
+        <li>Мелкие противоречия между частями: в таблице одна цифра, в выводе — другая</li>
+        <li>Агент «забыл» часть поручения — оно просто потерялось между другими</li>
+        <li>Проверять нечем: сверять надо всё сразу, а не частями</li>
+      </ul>
+    </div>
+
+    <h3>Очередь вместо связки: как отдавать несколько задач</h3>
+    <div class="card card-accent">
+      <pre>Не: «Сделай A, B и C за один раз»
+А: очередь из одной задачи.
+
+Порядок простой:
+1. Задача A с постусловием → приёмка (урок 0.3)
+2. Запись в ПРОГРЕСС.md: A принята, факты в файл
+3. Контрольная точка (урок 1.4) — если B меняет файлы A
+4. Задача B с постусловием → приёмка
+5. И так далее
+
+Мелкие независимые поручения («переименуй файлы по шаблону»)
+можно связкой. Скоординированные части одного результата — нет.</pre>
+    </div>
+
+    <h3>Граница правила</h3>
+    <p>Это не про «никогда не давай двух задач». Это про <strong>один результат</strong>: если части работы складываются в один артефакт (отчёт, пакет документов, кампания) — ведём их по очереди с контрольными точками между ними. Если поручения независимы и мелки — связка допустима, но каждое со своим постусловием.</p>
+  </div>
+
+  <!-- КАК ПРИМЕНИТЬ -->
+  <div class="section">
+    <h2>🛠️ Как применить</h2>
+    <div class="card card-success">
+      <h4>📢 Маркетинг</h4>
+      <p>Кампания из шести текстов: не «напиши все шесть», а очередь. Текст 1 принят (постусловие: до 500 знаков, призыв из брифа) → текст 2. К концу недели — шесть принятых текстов вместо шести черновиков «на доработке».</p>
+    </div>
+    <div class="card card-success">
+      <h4>🛒 Закупщик</h4>
+      <p>«Сравни КП и подготовь рекомендацию руководству» — две задачи: сначала таблица с постусловием (все позиции, источники), приёмка, потом рекомендация, которая опирается на принятую таблицу. Рекомендация на недопроверенной таблице — риск из урока 0 в чистом виде.</p>
+    </div>
+    <div class="card card-success">
+      <h4>🧑‍💼 Руководитель проекта</h4>
+      <p>Правило команды: «агент берёт следующую задачу из очереди только после записи о приёмке предыдущей в ПРОГРЕСС.md». Очередь видна всем, «что сейчас в работе» — одна строка.</p>
+    </div>
+  </div>
+
+  <!-- ЧЕКЛИСТ -->
+  <div class="section">
+    <h2>✅ Чеклист принятия результата</h2>
+    <ul class="checklist">
+      <li>У агента никогда не больше одной непринятой задачи</li>
+      <li>Скоординированные части одного результата иду по очереди с точками между ними</li>
+      <li>Каждая задача в очереди имеет своё постусловие</li>
+      <li>Приёмка каждой части зафиксирована в ПРОГРЕСС.md до старта следующей</li>
+    </ul>
+  </div>
+
+  <!-- КВИЗ -->
+  <div class="section">
+    <h2>📝 Проверка понимания</h2>
+    <div class="card card-accent">
+      <p><strong>Вопрос 1:</strong> Что означает правило «один агент — одна задача»?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Агенту нельзя давать более одной задачи в день</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Следующая задача начинается после приёмки предыдущей; в работе — одна</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Нужен отдельный агент на каждую задачу</div>
+      <div class="result" id="result1"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 2:</strong> «Сравни КП, напиши письмо и сделай презентацию» — как правильно поручить?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Одним сообщением — агент сам разберётся с приоритетами</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Очередью: сравнение с постусловием → приёмка → точка → письмо на основе принятой таблицы → приёмка → презентация</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Сначала презентация, чтобы был план</div>
+      <div class="result" id="result2"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 3:</strong> Какие поручения можно давать связкой?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">A) Мелкие и независимые, каждое со своим постусловием</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">B) Любые, если нет времени</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Никакие, связка всегда запрещена</div>
+      <div class="result" id="result3"></div>
+    </div>
+  </div>
+
+  <!-- ГЛАВНОЕ -->
+  <div class="section">
+    <div class="card card-success">
+      <h3>🎯 Главное из урока</h3>
+      <p><strong>«Всё сразу» — это три уверенные ошибки вместо одной проверенной задачи.</strong> Очередь из одной задачи с приёмкой и точками между частями — тот же объём работы, но каждая часть настоящая. Уровень 2 закончен: теперь задача — это договор с началом, концом и правилами без исключений.</p>
+    </div>
+  </div>
+
+  <div class="nav-footer">
+    <a href="../02-invariants/index.html" class="nav-btn">← Предыдущий урок</a>
+    <a href="../../catalog.html" class="nav-btn primary">К каталогу уроков →</a>
+  </div>
+
+</article>
+<footer>
+  <div class="container">
+    <p>© 2026 Artur A. · ИИ-агенты на практике</p>
+  </div>
+</footer>
+
+<script>
+function checkAnswer(element, isCorrect) {
+  const card = element.closest('.card');
+  const options = card.querySelectorAll('.quiz-option');
+  const resultDiv = card.querySelector('.result');
+  if (isCorrect) {
+    options.forEach(opt => {
+      opt.style.pointerEvents = 'none';
+      if (opt === element) opt.classList.add('correct');
+      else opt.classList.add('disabled');
+    });
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(16,185,129,0.1)';
+    resultDiv.style.border = '1px solid var(--success)';
+    resultDiv.innerHTML = '<strong>✅ Правильно!</strong>';
+  } else {
+    element.classList.add('wrong');
+    element.style.pointerEvents = 'none';
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(245,158,11,0.1)';
+    resultDiv.style.border = '1px solid var(--warning)';
+    resultDiv.innerHTML = '<strong>⚠️ Не совсем. Попробуйте другой вариант.</strong>';
+  }
+}
+</script>
+
+</body>
+</html>
