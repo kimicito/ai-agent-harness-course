@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>2.1 · Предусловие: что должно быть готово до старта — ИИ-агенты на практике</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+  :root { --bg: #0B0F19; --card: #111827; --text: #F3F4F6; --muted: #9CA3AF; --accent: #8B5CF6; --accent2: #06B6D4; --border: rgba(255,255,255,0.08); --success: #10B981; --warning: #F59E0B; --danger: #EF4444; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; margin: 0; overflow-x: hidden; }
+  .container { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+  header { padding: 16px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  .lesson-header { padding: 32px 0 16px; }
+  .lesson-header .phase { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+  .lesson-header h1 { margin: 8px 0; font-size: 1.8rem; line-height: 1.25; }
+  .lesson-header .meta { color: var(--muted); font-size: 0.9rem; }
+  .section { margin: 28px 0; }
+  .section h2 { color: var(--accent); font-size: 1.2rem; margin-bottom: 12px; }
+  .section h3 { color: var(--accent2); font-size: 1.05rem; margin: 20px 0 10px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 14px 0; }
+  .card-accent { border-left: 4px solid var(--accent); }
+  .card-success { border-left: 4px solid var(--success); }
+  .card-warning { border-left: 4px solid var(--warning); }
+  .highlight { background: rgba(139,92,246,0.1); padding: 2px 6px; border-radius: 4px; }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 8px 0; padding-left: 28px; position: relative; }
+  .checklist li:before { content: "☐"; position: absolute; left: 0; color: var(--accent); }
+  .example { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); border-radius: 8px; padding: 14px; margin: 12px 0; }
+  .example-label { color: var(--accent2); font-size: 0.75rem; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .nav-footer { display: flex; justify-content: space-between; padding: 32px 0; border-top: 1px solid var(--border); margin-top: 32px; flex-wrap: wrap; gap: 8px; }
+  .nav-btn { padding: 10px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); text-decoration: none; transition: all 0.2s; }
+  .nav-btn:hover { border-color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); border-color: var(--accent); }
+  footer { padding: 32px 16px; text-align: center; color: var(--muted); border-top: 1px solid var(--border); }
+  .card + .card { margin-top: 40px; }
+  .quiz-option + .quiz-option { margin-top: 8px; }
+  .card-accent:has(.quiz-option) { border-left: none; border-top: 3px solid var(--accent); }
+  .quiz-option { display: block; word-wrap: break-word; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; cursor: pointer; transition: all 0.2s; }
+  .quiz-option:hover { border-color: var(--accent); }
+  .quiz-option.correct { border-color: var(--success); background: rgba(16,185,129,0.1); }
+  .quiz-option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.1); }
+  .quiz-option.disabled { opacity: 0.5; pointer-events: none; }
+  .result { display: none; padding: 16px; border-radius: 8px; margin: 16px 0; }
+  .result.show { display: block; }
+  pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; }
+  ul, ol { padding-left: 20px; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.9rem; }
+  th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--accent); font-weight: 600; }
+  .compare-box { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  .compare-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  @media (max-width: 768px) {
+    .lesson-header h1 { font-size: 1.4rem; }
+    .compare-box { grid-template-columns: 1fr; }
+    .nav-footer { flex-direction: column; }
+    .nav-btn { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <a href="../../index.html" class="logo">🧠 ИИ-агенты на практике</a>
+    <a href="../../catalog.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">← Каталог</a> <span style="color: var(--border); margin: 0 8px;">|</span> <a href="../../glossary.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">📖 Термины</a>
+  </div>
+</header>
+
+<article class="container">
+
+  <div class="lesson-header">
+    <div class="phase">🧭 УРОВЕНЬ 2 · ЗАДАЧА КАК ДОГОВОР</div>
+    <h1>2.1 · Предусловие: что должно быть готово до старта</h1>
+    <div class="meta">🎯 Без кода · ✅ Интерактивный квиз · ⏱️ ~10 минут</div>
+  </div>
+
+  <!-- ЗАЧЕМ -->
+  <div class="section">
+    <h2>🎯 Зачем это бизнесу</h2>
+    <p>Уровень 1 дал агенту память: папка проекта, ритуал «продолжай по ПРОГРЕСС.md». Но вот вы пишете: «Составь сравнение цен по поставщикам» — а КП лежат в вашей почте, критерии сравнения только у вас в голове, а требования к оформлению вы озвучивали «в прошлый раз».</p>
+    <p>Агент честно начинает работать с тем, что есть: задаёт уточняющие вопросы про очевидное — или, что хуже, <strong>выдумывает недостающее</strong>. Помните уровень 0: уверенная выдумка выглядит как знание. Половина провалов случается не во время работы, а до неё.</p>
+    <div class="card card-warning">
+      <p><strong>Предусловие</strong> — это список «что должно быть готово до старта задачи». Как договор о аренде начинается с описания помещения, задача агенту начинается с описания того, что уже есть.</p>
+    </div>
+  </div>
+
+  <!-- ЧТО ИЗУЧАЕМ -->
+  <div class="section">
+    <h2>📚 Что изучаем</h2>
+
+    <h3>Три симптома невыполненного предусловия</h3>
+    <div class="card">
+      <table>
+        <tr><th>Симптом</th><th>Что происходит на самом деле</th></tr>
+        <tr><td>Агент задаёт вопросы про то, что «и так известно»</td><td>Это известно вам, а не ему. Каждая сессия — с чистого листа (урок 1.1)</td></tr>
+        <tr><td>В результате «правдоподобные» цифры без источника</td><td>Агент дорисовал недостающие данные — помните эффект адвоката из урока 0.2</td></tr>
+        <tr><td>Первые 20 минут сессии — «археология»</td><td>Вы роетесь в почте и чатах в поисках материалов вместо работы</td></tr>
+      </table>
+    </div>
+
+    <h3>Минимальный предусловный чек: три вопроса перед задачей</h3>
+    <div class="card card-accent">
+      <pre>Перед тем как дать агенту задачу, спросите себя:
+1. МАТЕРИАЛЫ: все ли исходные данные лежат в папке проекта?
+   (документы, цифры, файлы — не «вот в почте найдёшь»)
+2. ПРАВИЛА: записаны ли критерии и ограничения?
+   (в ИНСТРУКЦИИ.md или в самой задаче)
+3. ПРОДОЛЖЕНИЕ: понятно ли, откуда агент узнает контекст?
+   (ПРОГРЕСС.md прочитан, следующий шаг назван)
+
+Один «нет» — сначала закрываем дыру, потом стартуем.</pre>
+    </div>
+
+    <h3>Как выглядит предусловие в постановке задачи</h3>
+    <div class="compare-box">
+      <div class="compare-item">
+        <h4 style="color: var(--danger); margin: 0 0 10px;">✗ Задача без предусловия</h4>
+        <p style="font-size: 0.9rem; color: var(--muted);">«Сравни предложения по перевозке и посоветуй, с кем заключать договор». Агент: а какие предложения? какие критерии? что важнее — цена или сроки? Время пошло на переписку.</p>
+      </div>
+      <div class="compare-item">
+        <h4 style="color: var(--success); margin: 0 0 10px;">✓ Задача с предусловием</h4>
+        <p style="font-size: 0.9rem; color: var(--muted);">«В папке проекта (продолжай по ПРОГРЕСС.md) лежат 4 КП в файле kp_transport.xlsx. Критерии: цена 40%, сроки 30%, опыт с нашим типом груза 30%. Сравни по этим критериям». Агент стартует сразу.</p>
+      </div>
+    </div>
+
+    <h3>Предусловие — не разовая сверка, а привычка</h3>
+    <p>Не нужно устраивать допрос перед каждой мелкой задачей. Предусловия критичны для <strong>новых типов задач и важных поручений</strong>. Для рутины ваши шаблоны (урок 1.2) уже содержат предусловие — оно «вшито» в формулировку.</p>
+  </div>
+
+  <!-- КАК ПРИМЕНИТЬ -->
+  <div class="section">
+    <h2>🛠️ Как применить</h2>
+    <div class="card card-success">
+      <h4>🛒 Закупщик</h4>
+      <p>Перед расчётом итоговой таблицы: все 12 КП лежат в папке? Единый курс валют указан? Дата актуальности цен записана? Нет — сначала собираем, потом считаем.</p>
+    </div>
+    <div class="card card-success">
+      <h4>⚖️ Юрист</h4>
+      <p>Перед проверкой договора: текст договора в файле проекта? Актуальный шаблон требований компании подключён? Версия договора от контрагента — последняя? Уточнение версии — часть предусловия.</p>
+    </div>
+    <div class="card card-success">
+      <h4>📊 Финансист</h4>
+      <p>Перед прогнозом движения денег: выгрузки из 1С за нужный период на месте? Плановые платежи согласованы и записаны? Без них прогноз — гадание в красивой таблице.</p>
+    </div>
+  </div>
+
+  <!-- ЧЕКЛИСТ -->
+  <div class="section">
+    <h2>✅ Чеклист принятия результата</h2>
+    <ul class="checklist">
+      <li>Перед важной задачей я проверяю три пункта: материалы, правила, продолжение</li>
+      <li>Исходные данные лежат в папке проекта, а не «в почте найдёшь»</li>
+      <li>Критерии задачи записаны до её постановки, а не в процессе</li>
+      <li>Я распознаю симптомы пустого старта: вопросы про очевидное, выдуманные цифры, археология</li>
+    </ul>
+  </div>
+
+  <!-- КВИЗ -->
+  <div class="section">
+    <h2>📝 Проверка понимания</h2>
+    <div class="card card-accent">
+      <p><strong>Вопрос 1:</strong> Что такое предусловие задачи?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Проверка результата после завершения</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Список того, что должно быть готово до старта: материалы, правила, контекст</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Первая фраза в начале сессии</div>
+      <div class="result" id="result1"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 2:</strong> Агент задаёт много уточняющих вопросов про «очевидное». Что это значит?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">A) Предусловие не выполнено: ему не хватает материалов или правил, записанных в доступном виде</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">B) Плохая нейросеть, надо менять</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Так и задумано — пусть спрашивает</div>
+      <div class="result" id="result2"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 3:</strong> Где должны лежать исходные данные для задачи?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) В почте — агент разберётся</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">B) В голове у постановщика</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">C) В папке проекта, доступной агенту в начале сессии</div>
+      <div class="result" id="result3"></div>
+    </div>
+  </div>
+
+  <!-- ГЛАВНОЕ -->
+  <div class="section">
+    <div class="card card-success">
+      <h3>🎯 Главное из урока</h3>
+      <p><strong>Задача начинается до её постановки.</strong> Проверьте три вещи: материалы на месте, правила записаны, контекст доступен. Пустое предусловие — это старт агента с выдумкой, и уровень 0 уже научил, чем это кончается.</p>
+    </div>
+  </div>
+
+  <div class="nav-footer">
+    <a href="../01-checkpoints/index.html" class="nav-btn">← Предыдущий урок</a>
+    <a href="../02-postcondition/index.html" class="nav-btn primary">Следующий урок →</a>
+  </div>
+
+</article>
+<footer>
+  <div class="container">
+    <p>© 2026 Artur A. · ИИ-агенты на практике</p>
+  </div>
+</footer>
+
+<script>
+function checkAnswer(element, isCorrect) {
+  const card = element.closest('.card');
+  const options = card.querySelectorAll('.quiz-option');
+  const resultDiv = card.querySelector('.result');
+  if (isCorrect) {
+    options.forEach(opt => {
+      opt.style.pointerEvents = 'none';
+      if (opt === element) opt.classList.add('correct');
+      else opt.classList.add('disabled');
+    });
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(16,185,129,0.1)';
+    resultDiv.style.border = '1px solid var(--success)';
+    resultDiv.innerHTML = '<strong>✅ Правильно!</strong>';
+  } else {
+    element.classList.add('wrong');
+    element.style.pointerEvents = 'none';
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(245,158,11,0.1)';
+    resultDiv.style.border = '1px solid var(--warning)';
+    resultDiv.innerHTML = '<strong>⚠️ Не совсем. Попробуйте другой вариант.</strong>';
+  }
+}
+</script>
+
+</body>
+</html>

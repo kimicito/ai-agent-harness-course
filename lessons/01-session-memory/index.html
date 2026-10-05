@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>1.3 · Память между сессиями — ИИ-агенты на практике</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+  :root { --bg: #0B0F19; --card: #111827; --text: #F3F4F6; --muted: #9CA3AF; --accent: #8B5CF6; --accent2: #06B6D4; --border: rgba(255,255,255,0.08); --success: #10B981; --warning: #F59E0B; --danger: #EF4444; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; margin: 0; overflow-x: hidden; }
+  .container { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+  header { padding: 16px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  .lesson-header { padding: 32px 0 16px; }
+  .lesson-header .phase { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+  .lesson-header h1 { margin: 8px 0; font-size: 1.8rem; line-height: 1.25; }
+  .lesson-header .meta { color: var(--muted); font-size: 0.9rem; }
+  .section { margin: 28px 0; }
+  .section h2 { color: var(--accent); font-size: 1.2rem; margin-bottom: 12px; }
+  .section h3 { color: var(--accent2); font-size: 1.05rem; margin: 20px 0 10px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 14px 0; }
+  .card-accent { border-left: 4px solid var(--accent); }
+  .card-success { border-left: 4px solid var(--success); }
+  .card-warning { border-left: 4px solid var(--warning); }
+  .highlight { background: rgba(139,92,246,0.1); padding: 2px 6px; border-radius: 4px; }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 8px 0; padding-left: 28px; position: relative; }
+  .checklist li:before { content: "☐"; position: absolute; left: 0; color: var(--accent); }
+  .example { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); border-radius: 8px; padding: 14px; margin: 12px 0; }
+  .example-label { color: var(--accent2); font-size: 0.75rem; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .nav-footer { display: flex; justify-content: space-between; padding: 32px 0; border-top: 1px solid var(--border); margin-top: 32px; flex-wrap: wrap; gap: 8px; }
+  .nav-btn { padding: 10px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); text-decoration: none; transition: all 0.2s; }
+  .nav-btn:hover { border-color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); border-color: var(--accent); }
+  footer { padding: 32px 16px; text-align: center; color: var(--muted); border-top: 1px solid var(--border); }
+  .card + .card { margin-top: 40px; }
+  .quiz-option + .quiz-option { margin-top: 8px; }
+  .card-accent:has(.quiz-option) { border-left: none; border-top: 3px solid var(--accent); }
+  .quiz-option { display: block; word-wrap: break-word; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; cursor: pointer; transition: all 0.2s; }
+  .quiz-option:hover { border-color: var(--accent); }
+  .quiz-option.correct { border-color: var(--success); background: rgba(16,185,129,0.1); }
+  .quiz-option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.1); }
+  .quiz-option.disabled { opacity: 0.5; pointer-events: none; }
+  .result { display: none; padding: 16px; border-radius: 8px; margin: 16px 0; }
+  .result.show { display: block; }
+  pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; }
+  ul, ol { padding-left: 20px; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.9rem; }
+  th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--accent); font-weight: 600; }
+  .compare-box { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  .compare-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  @media (max-width: 768px) {
+    .lesson-header h1 { font-size: 1.4rem; }
+    .compare-box { grid-template-columns: 1fr; }
+    .nav-footer { flex-direction: column; }
+    .nav-btn { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <a href="../../index.html" class="logo">🧠 ИИ-агенты на практике</a>
+    <a href="../../catalog.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">← Каталог</a> <span style="color: var(--border); margin: 0 8px;">|</span> <a href="../../glossary.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">📖 Термины</a>
+  </div>
+</header>
+
+<article class="container">
+
+  <div class="lesson-header">
+    <div class="phase">📁 УРОВЕНЬ 1 · ПАПКА ПРОЕКТА: ЕДИНЫЙ ИСТОЧНИК ИСТИНЫ</div>
+    <h1>1.3 · Память между сессиями: слово «продолжай»</h1>
+    <div class="meta">🎯 Без кода · ✅ Интерактивный квиз · ⏱️ ~10 минут</div>
+  </div>
+
+  <!-- ЗАЧЕМ -->
+  <div class="section">
+    <h2>🎯 Зачем это бизнесу</h2>
+    <p>Настоящий налог на работу с агентом — пересказ контекста: «Так, мы в прошлый раз остановились на…, у нас есть таблица…, вспомни, я просил…». Десять минут на пересказ каждой сессии — это час в неделю, сожжённый на том, что агент мог бы прочитать сам за десять секунд.</p>
+    <p>Уровень 1.2 дал нам папку проекта. Этот урок превращает её в <span class="highlight">память между сессиями</span>: цель — начинать каждую сессию одной фразой «продолжай по ПРОГРЕСС.md».</p>
+  </div>
+
+  <!-- ЧТО ИЗУЧАЕМ -->
+  <div class="section">
+    <h2>📚 Что изучаем</h2>
+
+    <h3>Как устроена память агента</h3>
+    <p>Агент не «помнит» — он <strong>читает</strong>. В начале сессии он получает: инструкцию, файлы, которые вы подключили, и ваш первый запрос. Чем полнее эта «начальная корзина», тем меньше недоразумений. Память чата — запасной вариант, а не система хранения: она обрывается, устаревает и теряет детали.</p>
+    <div class="card">
+      <p><strong>Главный принцип:</strong> итоги живут в файле, переписка — в мусоре. Если важное осталось только в чате — считайте, что его нет.</p>
+    </div>
+
+    <h3>Ритуал конца сессии: три строки</h3>
+    <div class="card card-accent">
+      <pre>Правило конца сессии — 3 минуты:
+1. ЧТО СДЕЛАНО: закончили сверку 9 из 12 КП, таблица обновлена
+2. ЧТО НЕ СДЕЛАНО / ЗАБЛОКИРОВАНО: ждём КП «Метрология», НДС у них без документов
+3. СЛЕДУЮЩИЙ ШАГ: как придёт КП — сверить валюту и добавить строку
+
+Файл: ПРОГРЕСС.md (перезаписать раздел «Текущее состояние»)</pre>
+    </div>
+    <p>Три строки, не роман. Если запись занимает больше пяти минут — вы записываете лишнее.</p>
+
+    <h3>Ритуал начала сессии: одна фраза</h3>
+    <div class="compare-box">
+      <div class="compare-item">
+        <h4 style="color: var(--danger); margin: 0 0 10px;">✗ Плохой старт (10 минут)</h4>
+        <p style="font-size: 0.9rem; color: var(--muted);">«Привет! Мы работаем над сравнением цен на инструменты для цеха, ты в прошлый раз смотрел КП, помнишь? Так вот, там было 12 предложений, но…» — и так далее, пока агент не соберёт картину по крупицам.</p>
+      </div>
+      <div class="compare-item">
+        <h4 style="color: var(--success); margin: 0 0 10px;">✓ Хороший старт (10 секунд)</h4>
+        <p style="font-size: 0.9rem; color: var(--muted);">«Продолжай по файлу ПРОГРЕСС.md. Сначала перечитай его и скажи, что понял как следующий шаг.» Агент читает файл, пересказывает план, вы подтверждаете — работа идёт.</p>
+      </div>
+    </div>
+
+    <h3>Проверка понимания перед работой</h3>
+    <p>Первый шаг новой сессии — <strong>не задача, а пересказ агентом его следующего шага</strong>. Если пересказ неверный — дешевле поправить сейчас, чем исправлять час работы потом. Это тот же чек-лист приёмки, но в начале, а не в конце.</p>
+    <div class="card card-warning">
+      <p><strong>Ловушка «продолжай» без файла.</strong> Если крикнуть «продолжай» в пустой сессии без ПРОГРЕСС.md — агент уверенно выдумает, что же он «делал в прошлый раз». Помните уровень 0: уверенная выдумка выглядит как память. Слово «продолжай» работает только в паре с записью.</p>
+    </div>
+
+    <h3>Правило двух третей: заканчивайте раньше, чем сессия иссякнет</h3>
+    <p>У переписки с агентом есть невидимый лимит: когда диалог занимает больше двух третей этого лимита, модель начинает терять середину разговора — старые договорённости выпадают незаметно для вас. Поэтому последние минуты сессии — не «ещё немного работы», а <strong>инвестиция в следующую сессию</strong>: обновить ПРОГРЕСС.md, записать решения, вынести открытые вопросы. Дешевле закончить чисто, чем восстанавливать «что мы вообще решили» по обрывкам.</p>
+  </div>
+
+  <!-- КАК ПРИМЕНИТЬ -->
+  <div class="section">
+    <h2>🛠️ Как применить</h2>
+    <div class="card card-accent">
+      <h3>Шаблон стартового сообщения</h3>
+      <pre>Продолжай по файлу ПРОГРЕСС.md (папка проекта: [ссылка/путь]).
+Шаг 1: перечитай ПРОГРЕСС.md и своими словами скажи,
+       какой следующий шаг ты видишь.
+Шаг 2: подожди моего подтверждения.
+Шаг 3: после подтверждения — выполни шаг по чек-листу
+       из ЧЕК-ЛИСТЫ.md.</pre>
+    </div>
+    <div class="card card-success">
+      <h4>👥 HR</h4>
+      <p>Отбор на вакансию идёт две недели. Каждая сессия начинается с ПРОГРЕСС.md: сколько резюме обработано, кто в финале, кого ждём на интервью. Никакого «ну-ка вспомни, мы дошли до…».</p>
+    </div>
+    <div class="card card-success">
+      <h4>📢 Маркетинг</h4>
+      <p>Кампания из шести текстов: в ПРОГРЕСС.md статус каждого («готово/на правке/черновик») и замечания из прошлой сессии. Агент не переделывает «готовое» и не теряет правки.</p>
+    </div>
+  </div>
+
+  <!-- ЧЕКЛИСТ -->
+  <div class="section">
+    <h2>✅ Чеклист принятия результата</h2>
+    <ul class="checklist">
+      <li>Каждая сессия заканчивается обновлением ПРОГРЕСС.md (3 строки, 3 минуты)</li>
+      <li>Каждая сессия начинается с чтения ПРОГРЕСС.md агентом и пересказом следующего шага</li>
+      <li>Я подтверждаю план агента до начала работы</li>
+      <li>Важное не остаётся «только в чате» — переношу в файлы проекта</li>
+    </ul>
+  </div>
+
+  <!-- КВИЗ -->
+  <div class="section">
+    <h2>📝 Проверка понимания</h2>
+    <div class="card card-accent">
+      <p><strong>Вопрос 1:</strong> Почему «продолжай» в пустой сессии без файла опасно?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Агент обидится на недоверие</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Агент уверенно выдумает несуществующий контекст — а выдумка выглядит как память</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Сервис выдаст ошибку</div>
+      <div class="result" id="result1"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 2:</strong> Что агент делает в начале правильной новой сессии?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Сразу выполняет задачу по памяти чата</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Читает ПРОГРЕСС.md и пересказывает следующий шаг на подтверждение</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Просит вас заново объяснить проект</div>
+      <div class="result" id="result2"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 3:</strong> Сколько времени должна занимать запись прогресса в конце сессии?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Не нужно записывать, если сессия короткая</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) 3–5 минут: сделано / заблокировано / следующий шаг</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Подробный отчёт минимум на страницу</div>
+      <div class="result" id="result3"></div>
+    </div>
+  </div>
+
+  <!-- ГЛАВНОЕ -->
+  <div class="section">
+    <div class="card card-success">
+      <h3>🎯 Главное из урока</h3>
+      <p><strong>Память агента — это файлы, которые он читает в начале сессии.</strong> Ритуал «3 строки в конце → чтение и пересказ в начале» превращает десятиминутный пересказ контекста в десятисекундное «продолжай по ПРОГРЕСС.md». Без файла слово «продолжай» — генератор уверенной выдумки.</p>
+    </div>
+  </div>
+
+  <div class="nav-footer">
+    <a href="../01-project-folder-anatomy/index.html" class="nav-btn">← Предыдущий урок</a>
+    <a href="../01-checkpoints/index.html" class="nav-btn primary">Следующий урок →</a>
+  </div>
+
+</article>
+<footer>
+  <div class="container">
+    <p>© 2026 Artur A. · ИИ-агенты на практике</p>
+  </div>
+</footer>
+
+<script>
+function checkAnswer(element, isCorrect) {
+  const card = element.closest('.card');
+  const options = card.querySelectorAll('.quiz-option');
+  const resultDiv = card.querySelector('.result');
+  if (isCorrect) {
+    options.forEach(opt => {
+      opt.style.pointerEvents = 'none';
+      if (opt === element) opt.classList.add('correct');
+      else opt.classList.add('disabled');
+    });
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(16,185,129,0.1)';
+    resultDiv.style.border = '1px solid var(--success)';
+    resultDiv.innerHTML = '<strong>✅ Правильно!</strong>';
+  } else {
+    element.classList.add('wrong');
+    element.style.pointerEvents = 'none';
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(245,158,11,0.1)';
+    resultDiv.style.border = '1px solid var(--warning)';
+    resultDiv.innerHTML = '<strong>⚠️ Не совсем. Попробуйте другой вариант.</strong>';
+  }
+}
+</script>
+
+</body>
+</html>

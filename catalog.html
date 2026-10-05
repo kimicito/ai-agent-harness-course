@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>Каталог уроков — ИИ-агенты на практике</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  :root { --bg: #0B0F19; --card: #111827; --text: #F3F4F6; --muted: #9CA3AF; --accent: #8B5CF6; --accent2: #06B6D4; --border: rgba(255,255,255,0.08); --success: #10B981; --warning: #F59E0B; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; margin: 0; overflow-x: hidden; }
+  .container { max-width: 900px; margin: 0 auto; padding: 0 16px; }
+  header { padding: 16px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  .page-header { padding: 36px 0 8px; }
+  .page-header .phase { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+  .page-header h1 { margin: 8px 0; font-size: 1.9rem; }
+  .page-header p { color: var(--muted); font-size: 0.95rem; }
+  .lesson-list { padding: 16px 0 40px; }
+  .lesson-card { display: block; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; margin-bottom: 12px; text-decoration: none; color: var(--text); transition: all 0.2s; }
+  .lesson-card:hover { border-color: var(--accent); transform: translateX(4px); }
+  .lesson-card .num { color: var(--accent2); font-size: 0.8rem; font-weight: 700; }
+  .lesson-card h3 { margin: 6px 0; font-size: 1.1rem; }
+  .lesson-card p { margin: 0 0 10px; color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+  .lesson-card .meta { display: flex; gap: 12px; font-size: 0.78rem; color: var(--muted); flex-wrap: wrap; }
+  .badge { background: rgba(139,92,246,0.15); color: var(--accent); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; }
+  .badge-green { background: rgba(16,185,129,0.15); color: var(--success); padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; }
+  .level-block { margin-top: 36px; }
+  .level-block h2 { color: var(--accent); font-size: 1.25rem; margin-bottom: 6px; }
+  .level-block > p { color: var(--muted); font-size: 0.9rem; margin-top: 0; }
+  .soon-card { background: var(--card); border: 1px dashed var(--border); border-radius: 12px; padding: 16px 20px; margin-bottom: 10px; opacity: 0.65; }
+  .soon-card h4 { margin: 0 0 4px; font-size: 0.98rem; }
+  .soon-card p { margin: 0; color: var(--muted); font-size: 0.85rem; }
+  footer { padding: 32px 16px; text-align: center; color: var(--muted); border-top: 1px solid var(--border); }
+  footer a { color: var(--muted); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <a href="index.html" class="logo">🤖 ИИ-агенты на практике</a>
+    <a href="index.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">← На главную</a> <span style="color: var(--border); margin: 0 8px;">|</span> <a href="glossary.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">📖 Термины</a>
+  </div>
+</header>
+
+<div class="container">
+  <div class="page-header">
+    <div class="phase">КАТАЛОГ УРОКОВ</div>
+    <h1>Программа по уровням</h1>
+    <p>Начните с Уровня 0 — он опубликован полностью. Остальные уровни появятся по мере готовности.</p>
+  </div>
+
+  <div class="level-block">
+    <h2>🎯 Уровень 0 · «Сказал готово» ≠ «Сделано»</h2>
+    <p>Почему ИИ сообщает о готовности того, чего нет — и как устроить проверку без лишней работы.</p>
+    <div class="lesson-list">
+      <a href="lessons/00-promised-vs-done/index.html" class="lesson-card">
+        <div class="num">УРОК 0.1</div>
+        <h3>Разрыв между обещанным и реальным</h3>
+        <p>«Готово» — это слово, а не факт. Что такое разрыв проверки, как замерить свой на 10 задачах и почему «просто проверяйте» — пустой совет.</p>
+        <div class="meta"><span class="badge-green">✅ квиз</span><span>⏱️ ~10 минут</span><span>🛒 ⚖️ 👥 🚚 примеры</span></div>
+      </a>
+      <a href="lessons/00-confidence-trap/index.html" class="lesson-card">
+        <div class="num">УРОК 0.2</div>
+        <h3>Почему ИИ уверенно ошибается</h3>
+        <p>Как «думает» ИИ, эффект адвоката собственного ответа, почему «проверь себя» не работает и какой вопрос работает вместо него.</p>
+        <div class="meta"><span class="badge-green">✅ квиз</span><span>⏱️ ~10 минут</span><span>🚚 📢 ✅ примеры</span></div>
+      </a>
+      <a href="lessons/00-acceptance-checklist/index.html" class="lesson-card">
+        <div class="num">УРОК 0.3</div>
+        <h3>Чек-лист приёмки: как выглядит «сделано»</h3>
+        <p>Признаки готовности до старта задачи. Три уровня проверки: формальный, выборочный, сквозной. Шаблон постусловия «сделано = проверяемый факт».</p>
+        <div class="meta"><span class="badge-green">✅ квиз + шаблон</span><span>⏱️ ~12 минут</span><span>🛒 ⚖️ примеры</span></div>
+      </a>
+      <a href="lessons/00-second-auditor/index.html" class="lesson-card">
+        <div class="num">УРОК 0.4</div>
+        <h3>Второй ИИ как аудитор</h3>
+        <p>Разделение исполнителя и проверяющего. Почему аудитору нельзя показывать «ход мыслей» исполнителя. Готовый промпт аудитора и его границы.</p>
+        <div class="meta"><span class="badge-green">✅ квиз + промпт</span><span>⏱️ ~12 минут</span><span>⚖️ 🛒 💼 примеры</span></div>
+      </a>
+    </div>
+  </div>
+
+  <div class="level-block">
+    <h2>📁 Уровень 1 · Папка проекта: единый источник истины</h2>
+    <p>Агент начинает каждую сессию с чистого листа. Папка проекта — его единственная память: инструкция, прогресс, решения, точки отката.</p>
+    <div class="lesson-list">
+      <a href="lessons/01-unwritten-doesnt-exist/index.html" class="lesson-card">
+        <div class="num">УРОК 1.1</div>
+        <h3>Если не записано — для агента не существует</h3>
+        <p>Марковское состояние простыми словами. Три места, где теряется знание, и правило пяти минут: объяснил агенту — записал.</p>
+        <div class="meta"><span class="badge-green">✅ квиз</span><span>⏱️ ~10 минут</span><span>🛒 ⚖️ 👥 примеры</span></div>
+      </a>
+      <a href="lessons/01-project-folder-anatomy/index.html" class="lesson-card">
+        <div class="num">УРОК 1.2</div>
+        <h3>Анатомия папки проекта</h3>
+        <p>Четыре файла вместо хаоса: ИНСТРУКЦИЯ, ПРОГРЕСС, РЕШЕНИЯ, ЧЕК-ЛИСТЫ. Готовые шаблоны каждого и правило «файл побеждает память».</p>
+        <div class="meta"><span class="badge-green">✅ квиз + шаблоны</span><span>⏱️ ~12 минут</span><span>🛒 🚚 примеры</span></div>
+      </a>
+      <a href="lessons/01-session-memory/index.html" class="lesson-card">
+        <div class="num">УРОК 1.3</div>
+        <h3>Память между сессиями: слово «продолжай»</h3>
+        <p>Ритуал конца сессии — три строки за три минуты. Ритуал начала — чтение ПРОГРЕСС.md и пересказ плана. Шаблон стартового сообщения.</p>
+        <div class="meta"><span class="badge-green">✅ квиз + шаблон</span><span>⏱️ ~10 минут</span><span>👥 📢 примеры</span></div>
+      </a>
+      <a href="lessons/01-checkpoints/index.html" class="lesson-card">
+        <div class="num">УРОК 1.4</div>
+        <h3>Контрольные точки: откат одним действием</h3>
+        <p>Когда ставить точки, три способа без программирования, процедура отката и папка _archive вместо удаления.</p>
+        <div class="meta"><span class="badge-green">✅ квиз</span><span>⏱️ ~10 минут</span><span>🛒 ⚖️ 📊 примеры</span></div>
+      </a>
+    </div>
+  </div>
+
+  <div class="level-block">
+    <h2>🧭 Уровень 2 · Задача как договор</h2>
+    <p>Предусловие, постусловие, инварианты и правило одной задачи — четыре элемента, превращающие поручение в соглашение, которое агент может выполнить, а вы принять.</p>
+    <div class="lesson-list">
+      <a href="lessons/02-precondition/index.html" class="lesson-card">
+        <div class="num">УРОК 2.1</div>
+        <h3>Предусловие: что должно быть готово до старта</h3>
+        <p>Три симптома пустого старта, минимальный предстартовый чек и примеры задач «с предусловием / без».</p>
+        <div class="meta"><span class="badge-green">✅ квиз</span><span>⏱️ ~10 минут</span><span>🛒 ⚖️ 📊 примеры</span></div>
+      </a>
+      <a href="lessons/02-postcondition/index.html" class="lesson-card">
+        <div class="num">УРОК 2.2</div>
+        <h3>Постусловие: «сделано» — это факт, а не слово</h3>
+        <p>Как вшить определение готовности в постановку задачи. Таблица «расплывчато → проверяемо», шаблон сдачи результата в двух частях, три ошибки постусловий.</p>
+        <div class="meta"><span class="badge-green">✅ квиз + шаблон</span><span>⏱️ ~12 минут</span><span>👥 📢 примеры</span></div>
+      </a>
+      <a href="lessons/02-invariants/index.html" class="lesson-card">
+        <div class="num">УРОК 2.3</div>
+        <h3>Инварианты: правила без исключений</h3>
+        <p>Чем инвариант отличается от чек-листа, три вопроса для своих инвариантов и почему «один раз можно» ломает всё.</p>
+        <div class="meta"><span class="badge-green">✅ квиз</span><span>⏱️ ~10 минут</span><span>⚖️ 👥 💼 примеры</span></div>
+      </a>
+      <a href="lessons/02-one-task-per-agent/index.html" class="lesson-card">
+        <div class="num">УРОК 2.4</div>
+        <h3>Один агент — одна задача</h3>
+        <p>Почему «всё сразу» режет качество каждой части. Очередь вместо связки, симптомы перегруза и границы правила.</p>
+        <div class="meta"><span class="badge-green">✅ квиз</span><span>⏱️ ~10 минут</span><span>📢 🛒 🧑‍💼 примеры</span></div>
+      </a>
+    </div>
+  </div>
+
+  <div class="level-block">
+    <h2>🔧 Уровень 3 · Диагностика: почему агент тупит</h2>
+    <p>Карта слоёв отказа, тест холодного старта, лестница ремонта от дешёвого к дорогому и журнал инцидентов — чтобы чинить причину, а не перебирать нейросети.</p>
+    <div class="lesson-list">
+      <a href="lessons/03-layers-of-failure/index.html" class="lesson-card">
+        <div class="num">УРОК 3.1</div>
+        <h3>Шесть слоёв отказа</h3>
+        <p>Правило двух провалов, карта «симптом → слой» и сжатие задачи до минимального примера. Карточка диагностики на рабочий стол.</p>
+        <div class="meta"><span class="badge-green">✅ квиз</span><span>⏱️ ~12 минут</span><span>🛒 ⚖️ примеры</span></div>
+      </a>
+      <a href="lessons/03-cold-start-test/index.html" class="lesson-card">
+        <div class="num">УРОК 3.2</div>
+        <h3>Тест холодного старта</h3>
+        <p>Пять вопросов чистой сессии без подсказок: что, где материалы, как проверить, правила, следующий шаг. Таблица «ответ → дыра».</p>
+        <div class="meta"><span class="badge-green">✅ квиз</span><span>⏱️ ~10 минут</span><span>🧑‍💼 🛒 📢 примеры</span></div>
+      </a>
+      <a href="lessons/03-repair-ladder/index.html" class="lesson-card">
+        <div class="num">УРОК 3.3</div>
+        <h3>Лестница ремонта: от дешёвого к дорогому</h3>
+        <p>Шесть ступеней ремонта, метод одного отключения и формат «что / почему / что делать» для записи ошибок.</p>
+        <div class="meta"><span class="badge-green">✅ квиз</span><span>⏱️ ~12 минут</span><span>📊 👥 примеры</span></div>
+      </a>
+      <a href="lessons/03-incident-log/index.html" class="lesson-card">
+        <div class="num">УРОК 3.4</div>
+        <h3>Журнал инцидентов и борьба с захламлением</h3>
+        <p>ИНЦИДЕНТЫ.md из четырёх колонок, три вида энтропии и месячный ритуал чистки с правилом постоянного размера.</p>
+        <div class="meta"><span class="badge-green">✅ квиз</span><span>⏱️ ~10 минут</span><span>🧑‍💼 🛒 📊 примеры</span></div>
+      </a>
+    </div>
+  </div>
+
+  <div class="level-block">
+    <h2>🪄 Уровень 4 · Дирижёр агентов: оркестрация без кода</h2>
+    <p>Три роли вместо «сделай всё», контрольные вопросы вместо микроменеджмента и месячный ритуал чистки всей системы — завершающий уровень курса.</p>
+    <div class="lesson-list">
+      <a href="lessons/04-roles/index.html" class="lesson-card">
+        <div class="num">УРОК 4.1</div>
+        <h3>Роли: планировщик → исполнитель → проверяющий</h3>
+        <p>Студент не проверяет собственную контрольную. Три роли, верификационный разрыв и ловушки оркестрации.</p>
+        <div class="meta"><span class="badge-green">✅ квиз</span><span>⏱️ ~12 минут</span><span>🛒 📢 📊 примеры</span></div>
+      </a>
+      <a href="lessons/04-checkpoint-questions/index.html" class="lesson-card">
+        <div class="num">УРОК 4.2</div>
+        <h3>Контрольные вопросы вместо микроменеджмента</h3>
+        <p>Точки остановки: три вопроса перед рискованным действием, вопросы через отрицание, доказательства вместо пересказа.</p>
+        <div class="meta"><span class="badge-green">✅ квиз + шаблон</span><span>⏱️ ~12 минут</span><span>🧑‍💼 ⚖️ 📊 примеры</span></div>
+      </a>
+      <a href="lessons/04-monthly-cleaning/index.html" class="lesson-card">
+        <div class="num">УРОК 4.3</div>
+        <h3>Ежемесячная чистка процессов</h3>
+        <p>Час в месяц на всю систему: инструкции, роли, доступы, метрики. Чек-лист зрелости и протокол чистки.</p>
+        <div class="meta"><span class="badge-green">✅ квиз + протокол</span><span>⏱️ ~12 минут</span><span>🧑‍💼 🛒 примеры</span></div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="container">
+    <p>© 2026 Artur A. · <a href="https://kimicito.github.io/ai-nontechnical-course/index.html">ИИ для не ИТ-специалистов</a> → ИИ-агенты на практике</p>
+  </div>
+</footer>
+
+</body>
+</html>

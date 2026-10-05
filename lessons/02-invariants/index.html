@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>2.3 · Инварианты: правила без исключений — ИИ-агенты на практике</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+  :root { --bg: #0B0F19; --card: #111827; --text: #F3F4F6; --muted: #9CA3AF; --accent: #8B5CF6; --accent2: #06B6D4; --border: rgba(255,255,255,0.08); --success: #10B981; --warning: #F59E0B; --danger: #EF4444; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; margin: 0; overflow-x: hidden; }
+  .container { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+  header { padding: 16px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  .lesson-header { padding: 32px 0 16px; }
+  .lesson-header .phase { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+  .lesson-header h1 { margin: 8px 0; font-size: 1.8rem; line-height: 1.25; }
+  .lesson-header .meta { color: var(--muted); font-size: 0.9rem; }
+  .section { margin: 28px 0; }
+  .section h2 { color: var(--accent); font-size: 1.2rem; margin-bottom: 12px; }
+  .section h3 { color: var(--accent2); font-size: 1.05rem; margin: 20px 0 10px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 14px 0; }
+  .card-accent { border-left: 4px solid var(--accent); }
+  .card-success { border-left: 4px solid var(--success); }
+  .card-warning { border-left: 4px solid var(--warning); }
+  .highlight { background: rgba(139,92,246,0.1); padding: 2px 6px; border-radius: 4px; }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 8px 0; padding-left: 28px; position: relative; }
+  .checklist li:before { content: "☐"; position: absolute; left: 0; color: var(--accent); }
+  .example { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); border-radius: 8px; padding: 14px; margin: 12px 0; }
+  .example-label { color: var(--accent2); font-size: 0.75rem; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .nav-footer { display: flex; justify-content: space-between; padding: 32px 0; border-top: 1px solid var(--border); margin-top: 32px; flex-wrap: wrap; gap: 8px; }
+  .nav-btn { padding: 10px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); text-decoration: none; transition: all 0.2s; }
+  .nav-btn:hover { border-color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); border-color: var(--accent); }
+  footer { padding: 32px 16px; text-align: center; color: var(--muted); border-top: 1px solid var(--border); }
+  .card + .card { margin-top: 40px; }
+  .quiz-option + .quiz-option { margin-top: 8px; }
+  .card-accent:has(.quiz-option) { border-left: none; border-top: 3px solid var(--accent); }
+  .quiz-option { display: block; word-wrap: break-word; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; cursor: pointer; transition: all 0.2s; }
+  .quiz-option:hover { border-color: var(--accent); }
+  .quiz-option.correct { border-color: var(--success); background: rgba(16,185,129,0.1); }
+  .quiz-option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.1); }
+  .quiz-option.disabled { opacity: 0.5; pointer-events: none; }
+  .result { display: none; padding: 16px; border-radius: 8px; margin: 16px 0; }
+  .result.show { display: block; }
+  pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; }
+  ul, ol { padding-left: 20px; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.9rem; }
+  th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--accent); font-weight: 600; }
+  .compare-box { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  .compare-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  @media (max-width: 768px) {
+    .lesson-header h1 { font-size: 1.4rem; }
+    .compare-box { grid-template-columns: 1fr; }
+    .nav-footer { flex-direction: column; }
+    .nav-btn { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <a href="../../index.html" class="logo">🧠 ИИ-агенты на практике</a>
+    <a href="../../catalog.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">← Каталог</a> <span style="color: var(--border); margin: 0 8px;">|</span> <a href="../../glossary.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">📖 Термины</a>
+  </div>
+</header>
+
+<article class="container">
+
+  <div class="lesson-header">
+    <div class="phase">🧭 УРОВЕНЬ 2 · ЗАДАЧА КАК ДОГОВОР</div>
+    <h1>2.3 · Инварианты: правила без исключений</h1>
+    <div class="meta">🎯 Без кода · ✅ Интерактивный квиз · ⏱️ ~10 минут</div>
+  </div>
+
+  <!-- ЗАЧЕМ -->
+  <div class="section">
+    <h2>🎯 Зачем это бизнесу</h2>
+    <p>Предусловие (урок 2.1) накрывает старт задачи, постусловие (урок 2.2) — её финиш. Но есть правила, которые действуют <strong>всегда</strong>, на каждом шаге любой задачи. Опечатку в таблице поймает проверка. А вот отправленное письмо, слитые в чат персональные данные или удалённый файл — проверка не поймает: событие уже произошло.</p>
+    <p>Такие правила называются <span class="highlight">инвариантами</span> — «неизменными». Их нарушение нельзя откатить контрольной точкой из урока 1.4. Поэтому у инвариантов один режим: никогда.</p>
+  </div>
+
+  <!-- ЧТО ИЗУЧАЕМ -->
+  <div class="section">
+    <h2>📚 Что изучаем</h2>
+
+    <h3>Чем инвариант отличается от чек-листа</h3>
+    <div class="compare-box">
+      <div class="compare-item">
+        <h4 style="color: var(--accent2); margin: 0 0 10px;">✅ Чек-лист приёмки</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted);">
+          <li>Про качество результата</li>
+          <li>Проверяется в конце</li>
+          <li>Ошибку можно исправить</li>
+          <li>Пример: «у каждой цены есть источник»</li>
+        </ul>
+      </div>
+      <div class="compare-item">
+        <h4 style="color: var(--danger); margin: 0 0 10px;">⛔ Инвариант</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted);">
+          <li>О недопустимых действиях</li>
+          <li>Действует всегда, на каждом шаге</li>
+          <li>Нарушение необратимо или катастрофично</li>
+          <li>Пример: «внешние тексты не уходят без моего чтения»</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Инварианты, которые есть почти у каждого</h3>
+    <div class="card card-accent">
+      <pre>📧 Внешнее — только через человека.
+   Письма, комментарии для прессы, ответы клиентам:
+   агент готовит, человек отправляет.
+🔒 Секреты и персональные данные — не отправлять.
+   Пароли, паспорта, зарплаты, реквизиты карт.
+🗑 Ничего не удалять, только в _archive.
+   (Мы уже ввели это в уроке 1.4 — теперь вы знаете
+   его настоящий статус: инвариант.)
+⚖️ Юридические сроки не трогаем без юриста.
+   Исковая давность, сроки ответа на претензии,
+   даты в договорах.</pre>
+    </div>
+
+    <h3>Почему «один раз можно» не работает</h3>
+    <p>Инвариант держится на дисциплине, а дисциплина ломается первым же «сейчас быстро, один разочек». Помните правило из урока 1.2: процесс, который можно нарушить, ломается в первый день, когда его нарушили. Для инвариантов это вдвойне так: после первого исключения правило перестаёт быть правилом — и для вас, и для агента, которому вы его объясняли.</p>
+    <div class="card card-warning">
+      <p><strong>Соблазнились нарушить?</strong> Не действуйте мимо правила — оформите исключение официально: запись в РЕШЕНИЯ.md с датой и причиной. Это изменение процесса, а не его обход. Разница принципиальна: обход разрушает, изменение развивает.</p>
+    </div>
+
+    <h3>Сколько инвариантов нужно</h3>
+    <p>Мало. Три-пять строк в ИНСТРУКЦИИ.md — норма. Если инвариантов больше десяти, вы записываете в инварианты то, что должно быть чек-листом: неотвратимое теряется в списке желательного. Спросите себя: «Что из этого нельзя отменить кнопкой "назад"?» — только это достойно инварианта.</p>
+  </div>
+
+  <!-- КАК ПРИМЕНИТЬ -->
+  <div class="section">
+    <h2>🛠️ Как применить</h2>
+    <div class="card card-accent">
+      <h3>Три вопроса для составления своих инвариантов</h3>
+      <pre>1. ЧТО НЕЛЬЗЯ ОТМЕНИТЬ: какое действие необратимо?
+   (отправка письма, публикация, оплата)
+2. ЧТО ДОРОГО ИСПРАВЛЯТЬ: какая ошибка стоит репутации
+   или денег вне зависимости от скорости реакции?
+   (публичный комментарий с неверной цифрой)
+3. ЧТО НАРУШАЕТ ЗАКОН ИЛИ ДОГОВОР: что запрещено
+   в принципе? (персональные данные, NDA)
+
+Ответы — в раздел «Инварианты» вашей ИНСТРУКЦИИ.md</pre>
+    </div>
+    <div class="card card-success">
+      <h4>⚖️ Юрист</h4>
+      <p>Инвариант: «Агент не предлагает формулировки по спорам и санкциям без моего запроса — только находит и цитирует». Защита от уверенного юридического мнения, которое не проверил юрист.</p>
+    </div>
+    <div class="card card-success">
+      <h4>👥 HR</h4>
+      <p>Инвариант: «Резюме и оценки кандидатов не покидают папку проекта». Персональные данные + оценочные суждения: утечка необратима и дорога.</p>
+    </div>
+    <div class="card card-success">
+      <h4>💼 Руководитель</h4>
+      <p>Инвариант: «Агент не общается с контрагентами от моего имени — ни в каком виде». Подготовка — да. Отправка — только человек.</p>
+    </div>
+  </div>
+
+  <!-- ЧЕКЛИСТ -->
+  <div class="section">
+    <h2>✅ Чеклист принятия результата</h2>
+    <ul class="checklist">
+      <li>У меня есть 3–5 инвариантов, записанных в ИНСТРУКЦИИ.md</li>
+      <li>Каждый инвариант — про необратимое или катастрофичное</li>
+      <li>Я не обхожу инварианты «один раз» — оформляю исключение в РЕШЕНИЯ.md</li>
+      <li>Я отличаю инвариант от чек-листного пункта</li>
+    </ul>
+  </div>
+
+  <!-- КВИЗ -->
+  <div class="section">
+    <h2>📝 Проверка понимания</h2>
+    <div class="card card-accent">
+      <p><strong>Вопрос 1:</strong> Что такое инвариант?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Пункт чек-листа приёмки, который проверяют первым</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Правило без исключений, действующее на каждом шаге; его нарушение необратимо или катастрофично</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Постусловие для срочных задач</div>
+      <div class="result" id="result1"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 2:</strong> Куда попадает старое правило, которое больше не нужно?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Просто перестаю ему следовать</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) В _archive — как и всё удаляемое (урок 1.4)</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Оставляю в инструкции «про запас»</div>
+      <div class="result" id="result2"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 3:</strong> Какое из правил достойно инварианта?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) «Таблицы должны быть аккуратными»</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">B) «По пятницам сверять цифры дважды»</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">C) «Агент не отправляет внешние письма — готовит черновик, отправляю я»</div>
+      <div class="result" id="result3"></div>
+    </div>
+  </div>
+
+  <!-- ГЛАВНОЕ -->
+  <div class="section">
+    <div class="card card-success">
+      <h3>🎯 Главное из урока</h3>
+      <p><strong>Инварианты — три-пять строк, которые дороже всех чек-листов.</strong> Они про необратимое: отправленное, удалённое, разглашённое. «Один раз можно» — конец правила. Нужно исключение — оформите его решением, а не обходом.</p>
+    </div>
+  </div>
+
+  <div class="nav-footer">
+    <a href="../02-postcondition/index.html" class="nav-btn">← Предыдущий урок</a>
+    <a href="../02-one-task-per-agent/index.html" class="nav-btn primary">Следующий урок →</a>
+  </div>
+
+</article>
+<footer>
+  <div class="container">
+    <p>© 2026 Artur A. · ИИ-агенты на практике</p>
+  </div>
+</footer>
+
+<script>
+function checkAnswer(element, isCorrect) {
+  const card = element.closest('.card');
+  const options = card.querySelectorAll('.quiz-option');
+  const resultDiv = card.querySelector('.result');
+  if (isCorrect) {
+    options.forEach(opt => {
+      opt.style.pointerEvents = 'none';
+      if (opt === element) opt.classList.add('correct');
+      else opt.classList.add('disabled');
+    });
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(16,185,129,0.1)';
+    resultDiv.style.border = '1px solid var(--success)';
+    resultDiv.innerHTML = '<strong>✅ Правильно!</strong>';
+  } else {
+    element.classList.add('wrong');
+    element.style.pointerEvents = 'none';
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(245,158,11,0.1)';
+    resultDiv.style.border = '1px solid var(--warning)';
+    resultDiv.innerHTML = '<strong>⚠️ Не совсем. Попробуйте другой вариант.</strong>';
+  }
+}
+</script>
+
+</body>
+</html>

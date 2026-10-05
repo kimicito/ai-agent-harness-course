@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>Термины — ИИ-агенты на практике</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  :root { --bg: #0B0F19; --card: #111827; --text: #F3F4F6; --muted: #9CA3AF; --accent: #8B5CF6; --accent2: #06B6D4; --border: rgba(255,255,255,0.08); --success: #10B981; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; margin: 0; }
+  .container { max-width: 900px; margin: 0 auto; padding: 0 16px; }
+  header { padding: 16px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  .page-header { padding: 36px 0 8px; }
+  .page-header h1 { margin: 8px 0; font-size: 1.9rem; }
+  .page-header p { color: var(--muted); font-size: 0.95rem; }
+  .term { background: var(--card); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 10px; padding: 16px 20px; margin-bottom: 12px; }
+  .term h3 { margin: 0 0 6px; font-size: 1.05rem; color: var(--accent); }
+  .term p { margin: 0; color: var(--muted); font-size: 0.92rem; line-height: 1.6; }
+  .term .en { color: var(--accent2); font-size: 0.78rem; font-weight: 600; }
+  footer { padding: 32px 16px; text-align: center; color: var(--muted); border-top: 1px solid var(--border); margin-top: 32px; }
+  footer a { color: var(--muted); text-decoration: none; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <a href="index.html" class="logo">🤖 ИИ-агенты на практике</a>
+    <a href="index.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">← На главную</a> <span style="color: var(--border); margin: 0 8px;">|</span> <a href="catalog.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">Каталог</a>
+  </div>
+</header>
+
+<div class="container">
+  <div class="page-header">
+    <h1>📖 Термины простыми словами</h1>
+    <p>Слова, которые встретятся в курсе. Без академического тумана — только то, что нужно для практики.</p>
+  </div>
+
+  <div class="term">
+    <h3>Агент <span class="en">· AI agent</span></h3>
+    <p>ИИ, который не просто отвечает на вопросы, а доводит задачу до результата: планирует шаги, использует инструменты (поиск, файлы, email), запоминает состояние. Сравните: чат-бот отвечает, агент выполняет.</p>
+  </div>
+
+  <div class="term">
+    <h3>Упряжь <span class="en">· harness</span></h3>
+    <p>Всё, что окружает ИИ, чтобы он работал надёжно: инструкции, файлы с контекстом, правила, проверки. Сама модель — это двигатель; упряжь — всё остальное. Один и тот же ИИ в разной «упряжи» даёт разный результат.</p>
+  </div>
+
+  <div class="term">
+    <h3>Разрыв проверки <span class="en">· verification gap</span></h3>
+    <p>Доля задач, где ИИ сообщил «готово», а фактически задача выполнена не полностью или неверно. Замеряется журналом на 10 задачах: колонки «сказал / проверил / совпало».</p>
+  </div>
+
+  <div class="term">
+    <h3>Предусловие <span class="en">· precondition</span></h3>
+    <p>Что должно быть готово ДО старта задачи: материалы на месте, доступы есть, правила известны. Если предусловие не выполнено, сессия начинается с археологии — и качество падает.</p>
+  </div>
+
+  <div class="term">
+    <h3>Постусловие <span class="en">· postcondition</span></h3>
+    <p>Формула «сделано = проверяемый факт». Примеры: «таблица на 12 позиций, у каждой цены есть источник». Определяется до старта задачи, а не после. Главный инструмент против ложных «готово».</p>
+  </div>
+
+  <div class="term">
+    <h3>Инвариант <span class="en">· invariant</span></h3>
+    <p>Правило, которое нельзя нарушать никогда, на любом шаге. Примеры: «секреты и пароли не отправлять в ИИ», «во внешние тексты ничего не отправлять без моего чтения».</p>
+  </div>
+
+  <div class="term">
+    <h3>Человек в цикле <span class="en">· human in the loop</span></h3>
+    <p>Правило, при котором ИИ готовит, а человек подтверждает критичные действия: отправку письма, публикацию, оплату. Автоматизация без этого правила на критичных операциях — риск.</p>
+  </div>
+
+  <div class="term">
+    <h3>Контрольная точка <span class="en">· checkpoint</span></h3>
+    <p>Сохранённое состояние, к которому можно вернуться одним действием. Аналогия: версия документа «до правок». Даёт возможность откатить работу агента без потерь.</p>
+  </div>
+
+  <div class="term">
+    <h3>Тест холодного старта <span class="en">· cold start test</span></h3>
+    <p>Проверка агента новой сессией без подсказок: пять вопросов — что это, как запустить, как проверить, какие правила, что делать дальше. Каждый неотвеченный из файлов вопрос — дыра в упряжи.</p>
+  </div>
+
+  <div class="term">
+    <h3>Одна задача <span class="en">· WIP = 1</span></h3>
+    <p>Правило: агент ведёт ровно одну задачу до готовности. «Сделай всё сразу» резко снижает качество каждой части — как у людей, только быстрее.</p>
+  </div>
+
+  <div class="term">
+    <h3>Эффект адвоката <span class="en">· self-confirming bias</span></h3>
+    <p>ИИ, решавший задачу, в процессе убедил себя в правильности решения. Поэтому самопроверка тем же ИИ почти не работает — он защищает свой ответ, а не ищет ошибки.</p>
+  </div>
+
+  <div class="term">
+    <h3>Энтропия процесса <span class="en">· process entropy</span></h3>
+    <p>Накопление хлама: противоречивые правила, устаревшие инструкции, заброшенные файлы. Процесс усложняется сам, если его специально не упрощать. Лечится ритуалом: раз в месяц удалять лишнее.</p>
+  </div>
+
+  <div class="term">
+    <h3>Разделение ролей <span class="en">· generator / evaluator</span></h3>
+    <p>Тот, кто делает задачу (исполнитель), не выносит вердикт о её готовности. Проверяет отдельный «аудитор» — лучше другая нейросеть в новой сессии и без доступа к «ходу мыслей» исполнителя.</p>
+  </div>
+
+  <div class="term">
+    <h3>Марковское состояние <span class="en">· clean slate sessions</span></h3>
+    <p>Каждая сессия агента начинается без истории: следующий шаг зависит только от того, что перед агентом сейчас — файлы и ваш запрос. Отсюда правило: всё важное живёт в файлах проекта, а не в памяти чата.</p>
+  </div>
+
+  <div class="term">
+    <h3>Единый источник истины <span class="en">· single source of truth</span></h3>
+    <p>Одна папка проекта, где лежит всё, что агенту положено знать: инструкция, прогресс, решения, чек-листы. Конфликт «память агента» против файла разрешается в пользу файла.</p>
+  </div>
+</div>
+
+<footer>
+  <div class="container">
+    <p>© 2026 Artur A. · <a href="https://kimicito.github.io/ai-nontechnical-course/index.html">ИИ для не ИТ-специалистов</a> → ИИ-агенты на практике</p>
+  </div>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>0.4 · Второй ИИ как аудитор — ИИ-агенты на практике</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+  :root { --bg: #0B0F19; --card: #111827; --text: #F3F4F6; --muted: #9CA3AF; --accent: #8B5CF6; --accent2: #06B6D4; --border: rgba(255,255,255,0.08); --success: #10B981; --warning: #F59E0B; --danger: #EF4444; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; margin: 0; overflow-x: hidden; }
+  .container { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+  header { padding: 16px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  .lesson-header { padding: 32px 0 16px; }
+  .lesson-header .phase { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+  .lesson-header h1 { margin: 8px 0; font-size: 1.8rem; line-height: 1.25; }
+  .lesson-header .meta { color: var(--muted); font-size: 0.9rem; }
+  .section { margin: 28px 0; }
+  .section h2 { color: var(--accent); font-size: 1.2rem; margin-bottom: 12px; }
+  .section h3 { color: var(--accent2); font-size: 1.05rem; margin: 20px 0 10px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 14px 0; }
+  .card-accent { border-left: 4px solid var(--accent); }
+  .card-success { border-left: 4px solid var(--success); }
+  .card-warning { border-left: 4px solid var(--warning); }
+  .highlight { background: rgba(139,92,246,0.1); padding: 2px 6px; border-radius: 4px; }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 8px 0; padding-left: 28px; position: relative; }
+  .checklist li:before { content: "☐"; position: absolute; left: 0; color: var(--accent); }
+  .example { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); border-radius: 8px; padding: 14px; margin: 12px 0; }
+  .example-label { color: var(--accent2); font-size: 0.75rem; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .nav-footer { display: flex; justify-content: space-between; padding: 32px 0; border-top: 1px solid var(--border); margin-top: 32px; flex-wrap: wrap; gap: 8px; }
+  .nav-btn { padding: 10px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); text-decoration: none; transition: all 0.2s; }
+  .nav-btn:hover { border-color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); border-color: var(--accent); }
+  footer { padding: 32px 16px; text-align: center; color: var(--muted); border-top: 1px solid var(--border); }
+  .card + .card { margin-top: 40px; }
+  .quiz-option + .quiz-option { margin-top: 8px; }
+  .card-accent:has(.quiz-option) { border-left: none; border-top: 3px solid var(--accent); }
+  .quiz-option { display: block; word-wrap: break-word; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; cursor: pointer; transition: all 0.2s; }
+  .quiz-option:hover { border-color: var(--accent); }
+  .quiz-option.correct { border-color: var(--success); background: rgba(16,185,129,0.1); }
+  .quiz-option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.1); }
+  .quiz-option.disabled { opacity: 0.5; pointer-events: none; }
+  .result { display: none; padding: 16px; border-radius: 8px; margin: 16px 0; }
+  .result.show { display: block; }
+  pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; }
+  ul, ol { padding-left: 20px; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.9rem; }
+  th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--accent); font-weight: 600; }
+  .compare-box { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  .compare-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  @media (max-width: 768px) {
+    .lesson-header h1 { font-size: 1.4rem; }
+    .compare-box { grid-template-columns: 1fr; }
+    .nav-footer { flex-direction: column; }
+    .nav-btn { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <a href="../../index.html" class="logo">🧠 ИИ-агенты на практике</a>
+    <a href="../../catalog.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">← Каталог</a> <span style="color: var(--border); margin: 0 8px;">|</span> <a href="../../glossary.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">📖 Термины</a>
+  </div>
+</header>
+
+<article class="container">
+
+  <div class="lesson-header">
+    <div class="phase">🎯 УРОВЕНЬ 0 · «СКАЗАЛ ГОТОВО» ≠ «СДЕЛАНО»</div>
+    <h1>0.4 · Второй ИИ как аудитор</h1>
+    <div class="meta">🎯 Без кода · ✅ Интерактивный квиз · ⏱️ ~12 минут</div>
+  </div>
+
+  <!-- ЗАЧЕМ -->
+  <div class="section">
+    <h2>🎯 Зачем это бизнесу</h2>
+    <p>Из урока 0.2 вы знаете: ИИ — адвокат собственного ответа, сам себя он проверяет плохо. Значит, пусть результат проверяет <strong>другой</strong> ИИ. Это самый дешёвый способ поднять надёжность: не нужно ничего программировать, нужен второй аккаунт или вторая нейросеть и правильная постановка задачи.</p>
+    <p>Разделение исполнителя и проверяющего — тот же принцип, по которому в компаниях счета проверяют не тем же бухгалтером, который их выставил.</p>
+  </div>
+
+  <!-- ЧТО ИЗУЧАЕМ -->
+  <div class="section">
+    <h2>📚 Что изучаем</h2>
+
+    <h3>Роли: исполнитель и аудитор</h3>
+    <div class="compare-box">
+      <div class="compare-item">
+        <h4 style="color: var(--accent); margin: 0 0 10px;">🔨 Исполнитель</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted);">
+          <li>Делает задачу</li>
+          <li>Оптимист по должности</li>
+          <li>Считает, что всё готово</li>
+          <li>Не выносит итоговый вердикт</li>
+        </ul>
+      </div>
+      <div class="compare-item">
+        <h4 style="color: var(--accent2); margin: 0 0 10px;">🔍 Аудитор</h4>
+        <ul style="font-size: 0.9rem; color: var(--muted);">
+          <li>Ничего не делает — только проверяет</li>
+          <li>Настроен придирчиво</li>
+          <li>Видит задачу впервые</li>
+          <li>Выносит вердикт: принять / доработать</li>
+        </ul>
+      </div>
+    </div>
+
+    <h3>Главное правило: аудитор не видит «ход мыслей» исполнителя</h3>
+    <div class="card card-warning">
+      <p>Не пересылайте аудитору переписку с исполнителем и его объяснения «как я это делал». Иначе аудитор <strong>унаследует уверенность исполнителя</strong> и подтвердит его ошибки. Аудитору даём три вещи: исходную задачу, результат, источники для сверки. Всё.</p>
+    </div>
+    <p>Для аудитора лучше подходит <strong>другая нейросеть</strong> (Claude проверяет ChatGPT, Kimi — Claude): разные системы ошибаются по-разному, и ошибка одной часто видна другой. Если второй нейросети под рукой нет — та же, но в новой сессии без истории переписки.</p>
+
+    <h3>Как ставить задачу аудитору</h3>
+    <div class="card card-accent">
+      <h3>Шаблон промпта аудитора</h3>
+      <pre>Ты — строгий проверяющий. Задача была: [формулировка].
+
+Результат исполнителя: [текст/таблица/файл].
+
+Проверь:
+1) выполнены ли все части задачи;
+2) соответствуют ли факты и цифры источникам;
+3) есть ли противоречия внутри результата.
+
+Формат ответа: список найденных проблем,
+каждая — с указанием места и сути. Если проблем нет,
+напиши «замечаний нет» и перечисли, что именно сверил.</pre>
+    </div>
+    <p>Обратите внимание на последнюю фразу: «перечисли, что именно сверил». Без неё аудитор может молча пропустить половину проверки.</p>
+
+    <h3>Чего аудитор не заменит</h3>
+    <p>ИИ-аудитор — тоже ИИ: он ловит несоответствия и грубые ошибки, но <strong>ответственность за решение остаётся на человеке</strong>. Договор с последствиями в миллион рублей подписываете не вы и не ИИ-аудитор — юрист, который прочитал текст сам. Аудитор снижает риск, он его не отменяет.</p>
+  </div>
+
+  <!-- КАК ПРИМЕНИТЬ -->
+  <div class="section">
+    <h2>🛠️ Как применить</h2>
+    <div class="card card-success">
+      <h4>⚖️ Юрист</h4>
+      <p>Исполнитель нашёл риски в договоре → аудитор отдельной сессией проверяет: каждое замечание существует в тексте, каждая цитата точная, ничего критичного не пропущено. Двойная проверка «глазами двух разных систем».</p>
+    </div>
+    <div class="card card-success">
+      <h4>🛒 Закупщик</h4>
+      <p>Исполнитель сравнил 12 КП → аудитор заново считает итоговые суммы по 3 случайным позициям и сверяет, что все 12 КП попали в таблицу. Дёшево: 3 минуты вместо полного пересчёта.</p>
+    </div>
+    <div class="card card-success">
+      <h4>💼 Продажи и маркетинг</h4>
+      <p>Исполнитель написал коммерческое предложение → аудитор ищет: обещания, которых компания не давала; цифры без источника; несоответствия с прайсом. Внешние обещания — зона нулевой терпимости к ошибкам.</p>
+    </div>
+  </div>
+
+  <!-- ЧЕКЛИСТ -->
+  <div class="section">
+    <h2>✅ Чеклист принятия результата</h2>
+    <ul class="checklist">
+      <li>У меня есть доступ ко второй нейросети (или второй аккаунт)</li>
+      <li>Аудитору я даю только: задачу, результат, источники — без переписки с исполнителем</li>
+      <li>В промпте аудитора есть требование перечислить, что именно проверено</li>
+      <li>Для решений с последствиями финальное слово — за человеком, аудитор лишь фильтр</li>
+    </ul>
+  </div>
+
+  <!-- КВИЗ -->
+  <div class="section">
+    <h2>📝 Проверка понимания</h2>
+    <div class="card card-accent">
+      <p><strong>Вопрос 1:</strong> Почему аудитору нельзя показывать переписку с исполнителем?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Аудитор не умеет читать длинные тексты</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Он унаследует уверенность исполнителя и перестанет проверять критично</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Это запрещено правилами сервисов</div>
+      <div class="result" id="result1"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 2:</strong> Кого лучше ставить аудитором?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">A) Другую нейросеть в новой сессии — разные ИИ ошибаются по-разному</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">B) Тот же чат, где задача решалась</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Любой вариант одинаково хорош</div>
+      <div class="result" id="result2"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 3:</strong> ИИ-аудитор проверил договор и замечаний не нашёл. Достаточно ли это для подписания?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Да, два ИИ сошлись — значит всё верно</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Нет — аудитор снижает риск, но ответственное решение принимает человек, читавший текст сам</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Да, если аудитор — более дорогая модель</div>
+      <div class="result" id="result3"></div>
+    </div>
+  </div>
+
+  <!-- ГЛАВНОЕ -->
+  <div class="section">
+    <div class="card card-success">
+      <h3>🎯 Главное из урока</h3>
+      <p><strong>Исполнитель не проверяет свою работу — это делает аудитор.</strong> Дайте аудитору задачу, результат и источники, но не «ход мыслей» исполнителя. Идеально — другая нейросеть в новой сессии. Аудитор — фильтр рисков, а не замена вашей ответственности.</p>
+    </div>
+  </div>
+
+  <div class="nav-footer">
+    <a href="../00-acceptance-checklist/index.html" class="nav-btn">← Предыдущий урок</a>
+    <a href="../../catalog.html" class="nav-btn primary">К каталогу уроков →</a>
+  </div>
+
+</article>
+<footer>
+  <div class="container">
+    <p>© 2026 Artur A. · ИИ-агенты на практике</p>
+  </div>
+</footer>
+
+<script>
+function checkAnswer(element, isCorrect) {
+  const card = element.closest('.card');
+  const options = card.querySelectorAll('.quiz-option');
+  const resultDiv = card.querySelector('.result');
+  if (isCorrect) {
+    options.forEach(opt => {
+      opt.style.pointerEvents = 'none';
+      if (opt === element) opt.classList.add('correct');
+      else opt.classList.add('disabled');
+    });
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(16,185,129,0.1)';
+    resultDiv.style.border = '1px solid var(--success)';
+    resultDiv.innerHTML = '<strong>✅ Правильно!</strong>';
+  } else {
+    element.classList.add('wrong');
+    element.style.pointerEvents = 'none';
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(245,158,11,0.1)';
+    resultDiv.style.border = '1px solid var(--warning)';
+    resultDiv.innerHTML = '<strong>⚠️ Не совсем. Попробуйте другой вариант.</strong>';
+  }
+}
+</script>
+
+</body>
+</html>
