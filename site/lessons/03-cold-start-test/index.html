@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>3.2 · Тест холодного старта — ИИ-агенты на практике</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+  :root { --bg: #0B0F19; --card: #111827; --text: #F3F4F6; --muted: #9CA3AF; --accent: #8B5CF6; --accent2: #06B6D4; --border: rgba(255,255,255,0.08); --success: #10B981; --warning: #F59E0B; --danger: #EF4444; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; margin: 0; overflow-x: hidden; }
+  .container { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+  header { padding: 16px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  .lesson-header { padding: 32px 0 16px; }
+  .lesson-header .phase { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+  .lesson-header h1 { margin: 8px 0; font-size: 1.8rem; line-height: 1.25; }
+  .lesson-header .meta { color: var(--muted); font-size: 0.9rem; }
+  .section { margin: 28px 0; }
+  .section h2 { color: var(--accent); font-size: 1.2rem; margin-bottom: 12px; }
+  .section h3 { color: var(--accent2); font-size: 1.05rem; margin: 20px 0 10px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 14px 0; }
+  .card-accent { border-left: 4px solid var(--accent); }
+  .card-success { border-left: 4px solid var(--success); }
+  .card-warning { border-left: 4px solid var(--warning); }
+  .highlight { background: rgba(139,92,246,0.1); padding: 2px 6px; border-radius: 4px; }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 8px 0; padding-left: 28px; position: relative; }
+  .checklist li:before { content: "☐"; position: absolute; left: 0; color: var(--accent); }
+  .example { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); border-radius: 8px; padding: 14px; margin: 12px 0; }
+  .example-label { color: var(--accent2); font-size: 0.75rem; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .nav-footer { display: flex; justify-content: space-between; padding: 32px 0; border-top: 1px solid var(--border); margin-top: 32px; flex-wrap: wrap; gap: 8px; }
+  .nav-btn { padding: 10px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); text-decoration: none; transition: all 0.2s; }
+  .nav-btn:hover { border-color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); border-color: var(--accent); }
+  footer { padding: 32px 16px; text-align: center; color: var(--muted); border-top: 1px solid var(--border); }
+  .card + .card { margin-top: 40px; }
+  .quiz-option + .quiz-option { margin-top: 8px; }
+  .card-accent:has(.quiz-option) { border-left: none; border-top: 3px solid var(--accent); }
+  .quiz-option { display: block; word-wrap: break-word; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; cursor: pointer; transition: all 0.2s; }
+  .quiz-option:hover { border-color: var(--accent); }
+  .quiz-option.correct { border-color: var(--success); background: rgba(16,185,129,0.1); }
+  .quiz-option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.1); }
+  .quiz-option.disabled { opacity: 0.5; pointer-events: none; }
+  .result { display: none; padding: 16px; border-radius: 8px; margin: 16px 0; }
+  .result.show { display: block; }
+  pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; }
+  ul, ol { padding-left: 20px; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.9rem; }
+  th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--accent); font-weight: 600; }
+  .compare-box { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  .compare-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  @media (max-width: 768px) {
+    .lesson-header h1 { font-size: 1.4rem; }
+    .compare-box { grid-template-columns: 1fr; }
+    .nav-footer { flex-direction: column; }
+    .nav-btn { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <a href="../../index.html" class="logo">🧠 ИИ-агенты на практике</a>
+    <a href="../../catalog.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">← Каталог</a> <span style="color: var(--border); margin: 0 8px;">|</span> <a href="../../glossary.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">📖 Термины</a>
+  </div>
+</header>
+
+<article class="container">
+
+  <div class="lesson-header">
+    <div class="phase">🔧 УРОВЕНЬ 3 · ДИАГНОСТИКА: ПОЧЕМУ АГЕНТ ТУПИТ</div>
+    <h1>3.2 · Тест холодного старта</h1>
+    <div class="meta">🎯 Без кода · ✅ Интерактивный квиз · ⏱️ ~10 минут</div>
+  </div>
+
+  <!-- ЗАЧЕМ -->
+  <div class="section">
+    <h2>🎯 Зачем это бизнесу</h2>
+    <p>В уроке 3.1 мы нашли слой отказа по симптому. Но есть проверка, которая прощупывает <strong>все слои сразу</strong> и заранее показывает дыры ещё до первого сбоя. Она называется тестом холодного старта — по аналогии с запуском техники на морозе: заведётся ли без прикрученных «тепличных» условий вашей текущей сессии?</p>
+    <p>Если агент проходит холодный старт — он работает у любого коллеги, в любой день, после любого обрыва чата. Если нет — вы узнаёте, где дыра, за пять минут вместо пяти сюрпризов на дедлайне.</p>
+  </div>
+
+  <!-- ЧТО ИЗУЧАЕМ -->
+  <div class="section">
+    <h2>📚 Что изучаем</h2>
+
+    <h3>Пять вопросов новой сессии</h3>
+    <div class="card card-accent">
+      <pre>Откройте НОВУЮ сессию (чистую, без истории) и задайте
+агенту пять вопросов про ваш проект:
+
+1. Что это за проект и зачем он?
+2. Где лежат материалы и как их найти?
+3. Как проверить, что результат готов?
+4. Какие правила нельзя нарушать никогда?
+5. Где мы остановились и какой следующий шаг?
+
+Никаких подсказок и «ну ты помнишь».</pre>
+    </div>
+
+    <h3>Как читать результат</h3>
+    <div class="card">
+      <table>
+        <tr><th>Ответ агента</th><th>Вывод</th><th>Дыра (слой из урока 3.1)</th></tr>
+        <tr><td>Отвечает уверенно и верно</td><td>Упряжь держит</td><td>—</td></tr>
+        <tr><td>Мямлит или выдумывает контекст</td><td>Информация живёт только в старом чате</td><td>Слой 3: состояние — проверьте ПРОГРЕСС.md</td></tr>
+        <tr><td>Не знает правил</td><td>Инварианты не записаны</td><td>Слой 2: инструкции — ИНСТРУКЦИЯ.md</td></tr>
+        <tr><td>Не может найти файл</td><td>Навигация зависит от ваших рук</td><td>Слой 2: навигация</td></tr>
+        <tr><td>Не знает, как проверить готовность</td><td>Постусловие не записано</td><td>Слой 5: верификация — ЧЕК-ЛИСТЫ.md</td></tr>
+      </table>
+    </div>
+    <p><strong>Каждый неотвеченный из файлов вопрос — дыра в упряжи.</strong> Агент будет её угадывать. Угадывание всегда дороже, чем один раз записать: выдуманный контекст выглядит как настоящий (урок 0.2).</p>
+
+    <h3>Когда прогонять тест</h3>
+    <div class="card card-success">
+      <ul>
+        <li><strong>Приёмка нового агента</strong> на проект — обязательно, без теста не запускать.</li>
+        <li><strong>После больших правок упряжи</strong> — инструкции, папки, правил.</li>
+        <li><strong>Раз в месяц</strong> — как контрольная лампочка (в паре с ритуалом чистки, урок 3.4).</li>
+        <li><strong>Перед отпуском/болезнью</strong> — коллега сможет подхватить агента без вас?</li>
+      </ul>
+    </div>
+
+    <h3>Разбор типичного прогона</h3>
+    <div class="example">
+      <div class="example-label">Пример</div>
+      <p>Проект «Ежемесячный отчёт для руководства». Вопрос 5 — «где остановились?» — агент отвечает: «Подготовлен раздел о продажах, остались логистика и выводы». Вопрос 3 — «как проверить готовность?» — мямлит и предлагает «я обычно смотрю, чтобы всё было». Дыра: слой 5. Ремонт: в ЧЕК-ЛИСТЫ.md добавлен пункт «все цифры сверены с исходными выгрузками, отчёт читал заказчик». Пять минут работы — и следующий холодный старт чист.</p>
+    </div>
+  </div>
+
+  <!-- КАК ПРИМЕНИТЬ -->
+  <div class="section">
+    <h2>🛠️ Как применить</h2>
+    <div class="card card-success">
+      <h4>🧑‍💼 Руководитель</h4>
+      <p>Прогоните тест на агенте, которым пользуетесь сами, а потом попросите коллегу сделать то же самое. Расхождение ответов — знак, что упряжь зависит от ваших рук.</p>
+    </div>
+    <div class="card card-success">
+      <h4>🛒 Закупщик</h4>
+      <p>Тендерный сезон: перед стартом нового тендера агент проходит пять вопросов. Тендер не место для археологии (урок 2.1) — холодный старт гарантирует, что агент всплывёт готовым.</p>
+    </div>
+    <div class="card card-success">
+      <h4>📢 PR-отдел</h4>
+      <p>Агент пишет черновики за вас во время отпуска замещающего. Холодный старт коллегой: «какие правила нельзя нарушать?» — если ответа нет, отпуск не начинать.</p>
+    </div>
+  </div>
+
+  <!-- ЧЕКЛИСТ -->
+  <div class="section">
+    <h2>✅ Чеклист принятия результата</h2>
+    <ul class="checklist">
+      <li>Я прогоняю тест холодного старта при приёмке агента и раз в месяц</li>
+      <li>Все пять вопросов агент отвечает из файлов, а не угадывает</li>
+      <li>Каждую найденную дыру я закрываю записью в папке проекта</li>
+      <li>Тест проходит не только я, но и коллега без моих подсказок</li>
+    </ul>
+  </div>
+
+  <!-- КВИЗ -->
+  <div class="section">
+    <h2>📝 Проверка понимания</h2>
+    <div class="card card-accent">
+      <p><strong>Вопрос 1:</strong> Что такое тест холодного старта?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Проверка скорости ответа агента в час пик</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Пять вопросов в чистой сессии без подсказок: что, где материалы, как проверить, правила, следующий шаг</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Перезапуск подписки на нейросеть</div>
+      <div class="result" id="result1"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 2:</strong> Агент отвечает на вопросы уверенно, но факты не те. Что это?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Норма — уверенность важнее точности</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Дыра в упряжи, которую агент заделывает выдумкой: уверенная выдумка выглядит как знание</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Признак хорошей памяти чата</div>
+      <div class="result" id="result2"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 3:</strong> На вопрос «как проверить готовность?» агент не отвечает. Какой слой дырявый?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Слой 1: постановка задачи</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Слой 5: верификация — чек-листы приёмки не записаны или недоступны</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Слой 6: энтропия</div>
+      <div class="result" id="result3"></div>
+    </div>
+  </div>
+
+  <!-- ГЛАВНОЕ -->
+  <div class="section">
+    <div class="card card-success">
+      <h3>🎯 Главное из урока</h3>
+      <p><strong>Холодный старт — пять вопросов, которые прощупывают всю упряжь за пять минут.</strong> Неотвеченный вопрос — дыра, а дыру агент заделывает угадыванием. Прогоняйте тест при приёмке, после правил и раз в месяц — и сюрпризов станет меньше.</p>
+    </div>
+  </div>
+
+  <div class="nav-footer">
+    <a href="../03-layers-of-failure/index.html" class="nav-btn">← Предыдущий урок</a>
+    <a href="../03-repair-ladder/index.html" class="nav-btn primary">Следующий урок →</a>
+  </div>
+
+</article>
+<footer>
+  <div class="container">
+    <p>© 2026 Artur A. · ИИ-агенты на практике</p>
+  </div>
+</footer>
+
+<script>
+function checkAnswer(element, isCorrect) {
+  const card = element.closest('.card');
+  const options = card.querySelectorAll('.quiz-option');
+  const resultDiv = card.querySelector('.result');
+  if (isCorrect) {
+    options.forEach(opt => {
+      opt.style.pointerEvents = 'none';
+      if (opt === element) opt.classList.add('correct');
+      else opt.classList.add('disabled');
+    });
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(16,185,129,0.1)';
+    resultDiv.style.border = '1px solid var(--success)';
+    resultDiv.innerHTML = '<strong>✅ Правильно!</strong>';
+  } else {
+    element.classList.add('wrong');
+    element.style.pointerEvents = 'none';
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(245,158,11,0.1)';
+    resultDiv.style.border = '1px solid var(--warning)';
+    resultDiv.innerHTML = '<strong>⚠️ Не совсем. Попробуйте другой вариант.</strong>';
+  }
+}
+</script>
+
+</body>
+</html>

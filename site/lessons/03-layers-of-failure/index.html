@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>3.1 · Шесть слоёв отказа — ИИ-агенты на практике</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+  :root { --bg: #0B0F19; --card: #111827; --text: #F3F4F6; --muted: #9CA3AF; --accent: #8B5CF6; --accent2: #06B6D4; --border: rgba(255,255,255,0.08); --success: #10B981; --warning: #F59E0B; --danger: #EF4444; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; margin: 0; overflow-x: hidden; }
+  .container { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+  header { padding: 16px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  .lesson-header { padding: 32px 0 16px; }
+  .lesson-header .phase { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+  .lesson-header h1 { margin: 8px 0; font-size: 1.8rem; line-height: 1.25; }
+  .lesson-header .meta { color: var(--muted); font-size: 0.9rem; }
+  .section { margin: 28px 0; }
+  .section h2 { color: var(--accent); font-size: 1.2rem; margin-bottom: 12px; }
+  .section h3 { color: var(--accent2); font-size: 1.05rem; margin: 20px 0 10px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 14px 0; }
+  .card-accent { border-left: 4px solid var(--accent); }
+  .card-success { border-left: 4px solid var(--success); }
+  .card-warning { border-left: 4px solid var(--warning); }
+  .highlight { background: rgba(139,92,246,0.1); padding: 2px 6px; border-radius: 4px; }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 8px 0; padding-left: 28px; position: relative; }
+  .checklist li:before { content: "☐"; position: absolute; left: 0; color: var(--accent); }
+  .example { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); border-radius: 8px; padding: 14px; margin: 12px 0; }
+  .example-label { color: var(--accent2); font-size: 0.75rem; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .nav-footer { display: flex; justify-content: space-between; padding: 32px 0; border-top: 1px solid var(--border); margin-top: 32px; flex-wrap: wrap; gap: 8px; }
+  .nav-btn { padding: 10px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); text-decoration: none; transition: all 0.2s; }
+  .nav-btn:hover { border-color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); border-color: var(--accent); }
+  footer { padding: 32px 16px; text-align: center; color: var(--muted); border-top: 1px solid var(--border); }
+  .card + .card { margin-top: 40px; }
+  .quiz-option + .quiz-option { margin-top: 8px; }
+  .card-accent:has(.quiz-option) { border-left: none; border-top: 3px solid var(--accent); }
+  .quiz-option { display: block; word-wrap: break-word; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; cursor: pointer; transition: all 0.2s; }
+  .quiz-option:hover { border-color: var(--accent); }
+  .quiz-option.correct { border-color: var(--success); background: rgba(16,185,129,0.1); }
+  .quiz-option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.1); }
+  .quiz-option.disabled { opacity: 0.5; pointer-events: none; }
+  .result { display: none; padding: 16px; border-radius: 8px; margin: 16px 0; }
+  .result.show { display: block; }
+  pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; }
+  ul, ol { padding-left: 20px; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.9rem; }
+  th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--accent); font-weight: 600; }
+  .compare-box { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  .compare-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  @media (max-width: 768px) {
+    .lesson-header h1 { font-size: 1.4rem; }
+    .compare-box { grid-template-columns: 1fr; }
+    .nav-footer { flex-direction: column; }
+    .nav-btn { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <a href="../../index.html" class="logo">🧠 ИИ-агенты на практике</a>
+    <a href="../../catalog.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">← Каталог</a> <span style="color: var(--border); margin: 0 8px;">|</span> <a href="../../glossary.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">📖 Термины</a>
+  </div>
+</header>
+
+<article class="container">
+
+  <div class="lesson-header">
+    <div class="phase">🔧 УРОВЕНЬ 3 · ДИАГНОСТИКА: ПОЧЕМУ АГЕНТ ТУПИТ</div>
+    <h1>3.1 · Шесть слоёв отказа</h1>
+    <div class="meta">🎯 Без кода · ✅ Интерактивный квиз · ⏱️ ~12 минут</div>
+  </div>
+
+  <!-- ЗАЧЕМ -->
+  <div class="section">
+    <h2>🎯 Зачем это бизнесу</h2>
+    <p>Договор задачи есть (уровень 2), память есть (уровень 1) — а агент вдруг «тупит». Первый инстинкт: сменить нейросеть. Это самый дорогой и самый ненадёжный ремонт: неделя на переезд, результат непредсказуем, а причина чаще всего была не в модели.</p>
+    <p>Вместо гадания есть протокол: найти <strong>слой отказа</strong> — ту часть упряжи, где реально сломалось. Один симптом — один слой. Этот урок даёт карту слоёв, следующие — инструменты проверки.</p>
+  </div>
+
+  <!-- ЧТО ИЗУЧАЕМ -->
+  <div class="section">
+    <h2>📚 Что изучаем</h2>
+
+    <h3>Правило нуля: воспроизведите отказ дважды</h3>
+    <p>Один провал — шум: агент мог ошибиться случайно, вы могли неточно сформулировать. Два одинаковых провала в одном месте — <strong>дефект системы</strong>: у него есть адрес, и его можно починить. Прежде чем искать слой, убедитесь, что отказ вообще воспроизводится.</p>
+
+    <h3>Карта слоёв: симптом → где искать</h3>
+    <div class="card">
+      <table>
+        <tr><th>Что наблюдаете</th><th>Слой отказа</th><th>Типичный пример</th></tr>
+        <tr><td>Сделал не то, что просили</td><td><strong>1. Постановка задачи</strong></td><td>«Сравни КП» без критериев — сравнил по цене, хотя важнее сроки</td></tr>
+        <tr><td>Не нашёл правило или файл</td><td><strong>2. Инструкции и навигация</strong></td><td>Шаблон лежит в «Документах», а не в папке проекта — для агента его нет</td></tr>
+        <tr><td>«Забыл» решение прошлой сессии</td><td><strong>3. Состояние (память)</strong></td><td>Снова предлагает отменённое: не записано в РЕШЕНИЯ.md</td></tr>
+        <tr><td>Не может выполнить действие</td><td><strong>4. Среда и инструменты</strong></td><td>У агента нет доступа к вашей почте — а задача «ответь на письмо»</td></tr>
+        <tr><td>Отчитался «готово», а результата нет</td><td><strong>5. Верификация</strong></td><td>Таблица «готова» в чате, а файл не сохранён — разрыв из урока 0.1</td></tr>
+        <tr><td>Каждая сессия дороже и хуже предыдущей</td><td><strong>6. Энтропия</strong></td><td>50 противоречивых правил в инструкции; агент тонет в хламе</td></tr>
+      </table>
+    </div>
+    <p>Один симптом — один слой. Если кажется, что «сломано всё» — отказ ещё не воспроизведён на минимальном примере.</p>
+
+    <h3>Шаг второй: сожмите пример до минимума</h3>
+    <div class="example">
+      <div class="example-label">Как это выглядит</div>
+      <p>Агент косячит в огромной задаче «подготовь весь пакет документов по тендеру». Разбейте: поручьте одну справку, один файл. Отказ виден на малом — причина одна и адресная. Отказ виден только на большом — проблема в границах задачи (вспомните урок 2.4): задача слишком широкая, сузите.</p>
+    </div>
+
+    <h3>Частые ловушки распределения по слоям</h3>
+    <div class="card card-warning">
+      <ul>
+        <li><strong>«Это модель испортилась».</strong> Модель — слой за пределами карты. Если все шесть слоёв в порядке, а отказ воспроизводится дважды — тогда да, разговор о модели (урок 3.3).</li>
+        <li><strong>Два симптома = два слоя.</strong> «Сделал не то» и «отчитался раньше времени» — разные адреса: постановка задачи и верификация. Чинить надо оба, но по очереди.</li>
+        <li><strong>Чинить слой 4, когда дыра в слое 2.</strong> Не давайте агенту новый инструмент, если он не знает правил его применения — сначала инструкция.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- КАК ПРИМЕНИТЬ -->
+  <div class="section">
+    <h2>🛠️ Как применить</h2>
+    <div class="card card-accent">
+      <h3>Карточка диагностики на рабочий стол</h3>
+      <pre>1. Отказ воспроизводится дважды? Если нет — пока не чиним.
+2. Симптом: сделал не то / не нашёл / забыл / не может /
+   отчитался впустую / всё деградирует?
+3. Слой: 1 постановка · 2 инструкции · 3 состояние ·
+   4 среда · 5 верификация · 6 энтропия
+4. Сжать задачу до минимума — отказ живёт на малом?
+5. Слой известен → лестница ремонта (урок 3.3)</pre>
+    </div>
+    <div class="card card-success">
+      <h4>🛒 Закупщик</h4>
+      <p>Симптом: агент второй раз предлагает отключённого поставщика. Не «модель глупеет» — слой 3 (состояние): позиция по поставщику не записана в РЕШЕНИЯ.md. Ремонт: одна запись.</p>
+    </div>
+    <div class="card card-success">
+      <h4>⚖️ Юрист</h4>
+      <p>Симптом: агент цитирует не ту версию договора. Слой 2 (навигация): в папке две версии, не помечено, какая актуальная. Ремонт: именование «договор_АКТУАЛЬНО_05.10», старое — в _archive.</p>
+    </div>
+  </div>
+
+  <!-- ЧЕКЛИСТ -->
+  <div class="section">
+    <h2>✅ Чеклист принятия результата</h2>
+    <ul class="checklist">
+      <li>Я воспроизвожу отказ дважды, прежде чем искать причину</li>
+      <li>Я определяю слой по симптому, а не гадаю на модели</li>
+      <li>Я сжимаю задачу до минимума, чтобы отказ получил адрес</li>
+      <li>У меня есть карточка диагностики под рукой</li>
+    </ul>
+  </div>
+
+  <!-- КВИЗ -->
+  <div class="section">
+    <h2>📝 Проверка понимания</h2>
+    <div class="card card-accent">
+      <p><strong>Вопрос 1:</strong> Агент дважды сделал не то, что вы имели в виду. Ваши действия?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Сменить нейросеть — эта испортилась</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Отказ воспроизводится дважды → слой «постановка задачи»: уточнить формулировку, критерии, постусловие</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Подробнее объяснить устно в чате</div>
+      <div class="result" id="result1"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 2:</strong> Отказ виден только на большой задаче, на малом примере не воспроизводится. Что это значит?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Значит, пример выбран неверно</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Проблема в границах задачи: она слишком широкая — сузить (урок 2.4)</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Нужно ждать третьего провала</div>
+      <div class="result" id="result2"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 3:</strong> Агент отчитался «готово», а результата в файле нет. Какой слой?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Постановка задачи</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Верификация — «готово» не подтверждено фактом (урок 0.1)</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Энтропия</div>
+      <div class="result" id="result3"></div>
+    </div>
+  </div>
+
+  <!-- ГЛАВНОЕ -->
+  <div class="section">
+    <div class="card card-success">
+      <h3>🎯 Главное из урока</h3>
+      <p><strong>Один симптом — один слой, один отказ — один адрес.</strong> Воспроизведите дважды, сожмите до минимума, назовите слой из шести. Смена модели — это не диагноз, а последний пункт лестницы ремонта из урока 3.3.</p>
+    </div>
+  </div>
+
+  <div class="nav-footer">
+    <a href="../02-one-task-per-agent/index.html" class="nav-btn">← Предыдущий урок</a>
+    <a href="../03-cold-start-test/index.html" class="nav-btn primary">Следующий урок →</a>
+  </div>
+
+</article>
+<footer>
+  <div class="container">
+    <p>© 2026 Artur A. · ИИ-агенты на практике</p>
+  </div>
+</footer>
+
+<script>
+function checkAnswer(element, isCorrect) {
+  const card = element.closest('.card');
+  const options = card.querySelectorAll('.quiz-option');
+  const resultDiv = card.querySelector('.result');
+  if (isCorrect) {
+    options.forEach(opt => {
+      opt.style.pointerEvents = 'none';
+      if (opt === element) opt.classList.add('correct');
+      else opt.classList.add('disabled');
+    });
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(16,185,129,0.1)';
+    resultDiv.style.border = '1px solid var(--success)';
+    resultDiv.innerHTML = '<strong>✅ Правильно!</strong>';
+  } else {
+    element.classList.add('wrong');
+    element.style.pointerEvents = 'none';
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(245,158,11,0.1)';
+    resultDiv.style.border = '1px solid var(--warning)';
+    resultDiv.innerHTML = '<strong>⚠️ Не совсем. Попробуйте другой вариант.</strong>';
+  }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>3.4 · Журнал инцидентов — ИИ-агенты на практике</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+  :root { --bg: #0B0F19; --card: #111827; --text: #F3F4F6; --muted: #9CA3AF; --accent: #8B5CF6; --accent2: #06B6D4; --border: rgba(255,255,255,0.08); --success: #10B981; --warning: #F59E0B; --danger: #EF4444; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; margin: 0; overflow-x: hidden; }
+  .container { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+  header { padding: 16px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  .lesson-header { padding: 32px 0 16px; }
+  .lesson-header .phase { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+  .lesson-header h1 { margin: 8px 0; font-size: 1.8rem; line-height: 1.25; }
+  .lesson-header .meta { color: var(--muted); font-size: 0.9rem; }
+  .section { margin: 28px 0; }
+  .section h2 { color: var(--accent); font-size: 1.2rem; margin-bottom: 12px; }
+  .section h3 { color: var(--accent2); font-size: 1.05rem; margin: 20px 0 10px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 14px 0; }
+  .card-accent { border-left: 4px solid var(--accent); }
+  .card-success { border-left: 4px solid var(--success); }
+  .card-warning { border-left: 4px solid var(--warning); }
+  .highlight { background: rgba(139,92,246,0.1); padding: 2px 6px; border-radius: 4px; }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 8px 0; padding-left: 28px; position: relative; }
+  .checklist li:before { content: "☐"; position: absolute; left: 0; color: var(--accent); }
+  .example { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); border-radius: 8px; padding: 14px; margin: 12px 0; }
+  .example-label { color: var(--accent2); font-size: 0.75rem; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .nav-footer { display: flex; justify-content: space-between; padding: 32px 0; border-top: 1px solid var(--border); margin-top: 32px; flex-wrap: wrap; gap: 8px; }
+  .nav-btn { padding: 10px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); text-decoration: none; transition: all 0.2s; }
+  .nav-btn:hover { border-color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); border-color: var(--accent); }
+  footer { padding: 32px 16px; text-align: center; color: var(--muted); border-top: 1px solid var(--border); }
+  .card + .card { margin-top: 40px; }
+  .quiz-option + .quiz-option { margin-top: 8px; }
+  .card-accent:has(.quiz-option) { border-left: none; border-top: 3px solid var(--accent); }
+  .quiz-option { display: block; word-wrap: break-word; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; cursor: pointer; transition: all 0.2s; }
+  .quiz-option:hover { border-color: var(--accent); }
+  .quiz-option.correct { border-color: var(--success); background: rgba(16,185,129,0.1); }
+  .quiz-option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.1); }
+  .quiz-option.disabled { opacity: 0.5; pointer-events: none; }
+  .result { display: none; padding: 16px; border-radius: 8px; margin: 16px 0; }
+  .result.show { display: block; }
+  pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; }
+  ul, ol { padding-left: 20px; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.9rem; }
+  th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--accent); font-weight: 600; }
+  .compare-box { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  .compare-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  @media (max-width: 768px) {
+    .lesson-header h1 { font-size: 1.4rem; }
+    .compare-box { grid-template-columns: 1fr; }
+    .nav-footer { flex-direction: column; }
+    .nav-btn { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <a href="../../index.html" class="logo">🧠 ИИ-агенты на практике</a>
+    <a href="../../catalog.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">← Каталог</a> <span style="color: var(--border); margin: 0 8px;">|</span> <a href="../../glossary.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">📖 Термины</a>
+  </div>
+</header>
+
+<article class="container">
+
+  <div class="lesson-header">
+    <div class="phase">🔧 УРОВЕНЬ 3 · ДИАГНОСТИКА: ПОЧЕМУ АГЕНТ ТУПИТ</div>
+    <h1>3.4 · Журнал инцидентов и борьба с захламлением</h1>
+    <div class="meta">🎯 Без кода · ✅ Интерактивный квиз · ⏱️ ~10 минут</div>
+  </div>
+
+  <!-- ЗАЧЕМ -->
+  <div class="section">
+    <h2>🎯 Зачем это бизнесу</h2>
+    <p>Починили отказ по лестнице (урок 3.3) — и через месяц он вернулся. Почему? Потому что починка жила в переписке, а не в файлах. И второй враг: со временем правил становится всё больше, они противоречат друг другу, агент тонет — и снова «тупит». Уровень 3 закрывается двумя привычками: записывать инциденты и регулярно выбрасывать мусор.</p>
+  </div>
+
+  <!-- ЧТО ИЗУЧАЕМ -->
+  <div class="section">
+    <h2>📚 Что изучаем</h2>
+
+    <h3>Журнал инцидентов: одна таблица вместо памяти</h3>
+    <p>Файл <span class="highlight">ИНЦИДЕНТЫ.md</span> в папке проекта. Четыре колонки, строка на каждый сбой:</p>
+    <div class="card card-accent">
+      <pre>| Дата | Симптом и слой | Что / почему / что делать | Статус |
+|------|----------------|---------------------------|--------|
+| 05.10 | Забыл отключённого поставщика (слой 3) | Не записано решение. Занести в РЕШЕНИЯ.md, проверять по чек-листу | закрыто |
+| 05.10 | Отчитался «готово», файла нет (слой 5) | Нет постусловия сохранения. Добавить пункт в шаблон задачи | закрыто |
+| 07.10 | Снова предлагает старый шаблон письма (слой 3) | Шаблон не помечен версией. Ввести «шаблон_АКТУАЛЬНО» | в работе |</pre>
+    </div>
+    <p>Третья строка — самая важная: инцидент <strong>повторился</strong>. Значит, починка не стала частью упряжи. Смотрим в журнал: две записи про слой 3 за неделю — сигнал, что с состоянием проекта беда, а не «агент рассеянный».</p>
+
+    <h3>Энтропия: почему упряжь зарастает</h3>
+    <p>Каждый инцидент добавляет правило. Через полгода — сто правил, сорок из них про ситуации, которых уже нет. Агент читает все сто, тратит внимание на мёртвые сорок — и хуже соблюдает живые шестьдесят. Формально упряжь растёт, фактически слабеет. Это называется энтропией процесса.</p>
+    <div class="card">
+      <table>
+        <tr><th>Вид захламления</th><th>Как выглядит</th></tr>
+        <tr><td>Инструкции</td><td>Правила противоречат друг другу или описывают процессы, которых больше нет</td></tr>
+        <tr><td>Состояние</td><td>ПРОГРЕСС.md, которому нельзя доверять: планы не совпадают с реальностью</td></tr>
+        <tr><td>Среда</td><td>«А это делается вот так, я покажу» — шаги, которые живут только в вашей голове</td></tr>
+      </table>
+    </div>
+
+    <h3>Ритуал чистки: раз в месяц, отдельной сессией</h3>
+    <div class="card card-success">
+      <ol>
+        <li><strong>Правило стало проверкой?</strong> Удалить текст, оставить ссылку на проверку.</li>
+        <li><strong>Правило ни разу не сработало за месяц?</strong> Удалить.</li>
+        <li><strong>Правило нарушено трижды?</strong> Не усиливать словами — перестроить процесс.</li>
+        <li><strong>Файл состояния никто не читал?</strong> Удалить: недостоверное состояние хуже отсутствующего.</li>
+        <li><strong>Что удалено и почему</strong> — одна строка в РЕШЕНИЯ.md, чтобы не вернулось.</li>
+      </ol>
+    </div>
+    <div class="card card-warning">
+      <p><strong>Правило постоянного размера.</strong> Держите ИНСТРУКЦИЯ.md в фиксированном «бюджете» строк: хотите добавить правило — найдите, что удалить. Это единственный известный способ не вырасти до нечитаемости. Совмещать чистку с рабочими задачами нельзя — конфликт целей (вспомните урок 2.4): отдельная сессия, отдельная цель.</p>
+    </div>
+  </div>
+
+  <!-- КАК ПРИМЕНИТЬ -->
+  <div class="section">
+    <h2>🛠️ Как применить</h2>
+    <div class="card card-success">
+      <h4>🧑‍💼 Руководитель</h4>
+      <p>Назначьте первое число месяца «днём чистки»: час, агент проходит инструкции и журнал инцидентов по ритуалу. Результат — короткая запись «удалено X, добавлено Y, закрыто инцидентов Z». Через три месяца сравните время приёмки задач.</p>
+    </div>
+    <div class="card card-success">
+      <h4>🛒 Закупщик</h4>
+      <p>Тендерный сезон закрыт — время чистки: актуализировать списки поставщиков, выкинуть устаревшие шаблоны КП, сверить ПРОГРЕСС.md с реальностью. К началу следующего сезона упряжь снова лёгкая.</p>
+    </div>
+    <div class="card card-success">
+      <h4>📊 Финансист</h4>
+      <p>Журнал инцидентов — ваш аргумент в споре «стоит ли вообще возиться с этими агентами»: двадцать закрытых инцидентов с адресами слоёв — это измеримая экономия времени, а не вера.</p>
+    </div>
+  </div>
+
+  <!-- ЧЕКЛИСТ -->
+  <div class="section">
+    <h2>✅ Чеклист принятия результата</h2>
+    <ul class="checklist">
+      <li>У проекта есть ИНЦИДЕНТЫ.md, куда попадает каждый сбой в формате «что/почему/что делать»</li>
+      <li>Повтор инцидента трактую как дыру в упряжи, а не как «агент рассеянный»</li>
+      <li>Раз в месяц — отдельная сессия чистки по пяти шагам ритуала</li>
+      <li>Инструкции держатся в бюджете строк: добавил — удали что-то</li>
+    </ul>
+  </div>
+
+  <!-- КВИЗ -->
+  <div class="section">
+    <h2>📝 Проверка понимания</h2>
+    <div class="card card-accent">
+      <p><strong>Вопрос 1:</strong> Зачем журнал инцидентов?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Чтобы поругать агента на совещании</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Починка становится частью упряжи, а повторы инцидентов показывают слабый слой</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Для отчёта руководству о работе отдела</div>
+      <div class="result" id="result1"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 2:</strong> Инцидент повторился второй раз. Правильный вывод?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Агент рассеянный, напомнить строже</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Починка не стала частью файлов проекта — записать решение в упряжь (урок 1.2)</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Сменить нейросеть</div>
+      <div class="result" id="result2"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 3:</strong> Что делать с правилом, которое ни разу не пригодилось за месяц?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Оставить — вдруг пригодится</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Удалить по ритуалу чистки, отметив удаление в РЕШЕНИЯ.md</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Переписать подробнее</div>
+      <div class="result" id="result3"></div>
+    </div>
+  </div>
+
+  <!-- ГЛАВНОЕ -->
+  <div class="section">
+    <div class="card card-success">
+      <h3>🎯 Главное из урока</h3>
+      <p><strong>Инцидент записан — инцидент закрыт навсегда; правило не выброшено — упряжь тонет.</strong> Журнал превращает починки в накопление опыта, а месячный ритуал чистки не даёт опыту обратиться в свалку. Уровень 3 завершён: теперь вы не перебираете нейросети наугад, а диагностируете, чините и копите знания.</p>
+    </div>
+  </div>
+
+  <div class="nav-footer">
+    <a href="../03-repair-ladder/index.html" class="nav-btn">← Предыдущий урок</a>
+    <a href="../../catalog.html" class="nav-btn primary">К каталогу уроков →</a>
+  </div>
+
+</article>
+<footer>
+  <div class="container">
+    <p>© 2026 Artur A. · ИИ-агенты на практике</p>
+  </div>
+</footer>
+
+<script>
+function checkAnswer(element, isCorrect) {
+  const card = element.closest('.card');
+  const options = card.querySelectorAll('.quiz-option');
+  const resultDiv = card.querySelector('.result');
+  if (isCorrect) {
+    options.forEach(opt => {
+      opt.style.pointerEvents = 'none';
+      if (opt === element) opt.classList.add('correct');
+      else opt.classList.add('disabled');
+    });
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(16,185,129,0.1)';
+    resultDiv.style.border = '1px solid var(--success)';
+    resultDiv.innerHTML = '<strong>✅ Правильно!</strong>';
+  } else {
+    element.classList.add('wrong');
+    element.style.pointerEvents = 'none';
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(245,158,11,0.1)';
+    resultDiv.style.border = '1px solid var(--warning)';
+    resultDiv.innerHTML = '<strong>⚠️ Не совсем. Попробуйте другой вариант.</strong>';
+  }
+}
+</script>
+
+</body>
+</html>
