@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>4.3 · Ежемесячная чистка процессов — ИИ-агенты на практике</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+  :root { --bg: #0B0F19; --card: #111827; --text: #F3F4F6; --muted: #9CA3AF; --accent: #8B5CF6; --accent2: #06B6D4; --border: rgba(255,255,255,0.08); --success: #10B981; --warning: #F59E0B; --danger: #EF4444; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; margin: 0; overflow-x: hidden; }
+  .container { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+  header { padding: 16px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  .lesson-header { padding: 32px 0 16px; }
+  .lesson-header .phase { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+  .lesson-header h1 { margin: 8px 0; font-size: 1.8rem; line-height: 1.25; }
+  .lesson-header .meta { color: var(--muted); font-size: 0.9rem; }
+  .section { margin: 28px 0; }
+  .section h2 { color: var(--accent); font-size: 1.2rem; margin-bottom: 12px; }
+  .section h3 { color: var(--accent2); font-size: 1.05rem; margin: 20px 0 10px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 14px 0; }
+  .card-accent { border-left: 4px solid var(--accent); }
+  .card-success { border-left: 4px solid var(--success); }
+  .card-warning { border-left: 4px solid var(--warning); }
+  .highlight { background: rgba(139,92,246,0.1); padding: 2px 6px; border-radius: 4px; }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 8px 0; padding-left: 28px; position: relative; }
+  .checklist li:before { content: "☐"; position: absolute; left: 0; color: var(--accent); }
+  .example { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); border-radius: 8px; padding: 14px; margin: 12px 0; }
+  .example-label { color: var(--accent2); font-size: 0.75rem; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .nav-footer { display: flex; justify-content: space-between; padding: 32px 0; border-top: 1px solid var(--border); margin-top: 32px; flex-wrap: wrap; gap: 8px; }
+  .nav-btn { padding: 10px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); text-decoration: none; transition: all 0.2s; }
+  .nav-btn:hover { border-color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); border-color: var(--accent); }
+  footer { padding: 32px 16px; text-align: center; color: var(--muted); border-top: 1px solid var(--border); }
+  .card + .card { margin-top: 40px; }
+  .quiz-option + .quiz-option { margin-top: 8px; }
+  .card-accent:has(.quiz-option) { border-left: none; border-top: 3px solid var(--accent); }
+  .quiz-option { display: block; word-wrap: break-word; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; cursor: pointer; transition: all 0.2s; }
+  .quiz-option:hover { border-color: var(--accent); }
+  .quiz-option.correct { border-color: var(--success); background: rgba(16,185,129,0.1); }
+  .quiz-option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.1); }
+  .quiz-option.disabled { opacity: 0.5; pointer-events: none; }
+  .result { display: none; padding: 16px; border-radius: 8px; margin: 16px 0; }
+  .result.show { display: block; }
+  pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; }
+  ul, ol { padding-left: 20px; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.9rem; }
+  th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--accent); font-weight: 600; }
+  .compare-box { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  .compare-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  @media (max-width: 768px) {
+    .lesson-header h1 { font-size: 1.4rem; }
+    .compare-box { grid-template-columns: 1fr; }
+    .nav-footer { flex-direction: column; }
+    .nav-btn { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <a href="../../index.html" class="logo">🧠 ИИ-агенты на практике</a>
+    <a href="../../catalog.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">← Каталог</a> <span style="color: var(--border); margin: 0 8px;">|</span> <a href="../../glossary.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">📖 Термины</a>
+  </div>
+</header>
+
+<article class="container">
+
+  <div class="lesson-header">
+    <div class="phase">🪄 УРОВЕНЬ 4 · ДИРИЖЁР АГЕНТОВ: ОРКЕСТРАЦИЯ БЕЗ КОДА</div>
+    <h1>4.3 · Ежемесячная чистка процессов</h1>
+    <div class="meta">🎯 Без кода · ✅ Интерактивный квиз · ⏱️ ~12 минут</div>
+  </div>
+
+  <!-- ЗАЧЕМ -->
+  <div class="section">
+    <h2>🎯 Зачем это бизнесу</h2>
+    <p>Вы дирижируете оркестром: роли распределены, контрольные точки работают. Но оркестр играет каждый день, и партитуры зарастают пометками — инструкции пухнут, журналы копятся, роли перестают соответствовать реальности. В уроке 3.4 мы чистили упряжь одного проекта. Здесь масштаб другой: <strong>вся ваша система работы с агентами</strong> — раз в месяц, по регламенту, а не «когда-нибудь потом».</p>
+    <div class="card card-warning">
+      <p><strong>«Уберём потом» = «не уберём никогда».</strong> У следующего месяца свои задачи; он добавит новое поверх старого хлама — и так растёт энтропия процесса. Поэтому чистка — не «заодно с работой», а отдельное событие в календаре.</p>
+    </div>
+  </div>
+
+  <!-- ЧТО ИЗУЧАЕМ -->
+  <div class="section">
+    <h2>📚 Что изучаем</h2>
+
+    <h3>Повестка месячной чистки: один час, четыре вопроса</h3>
+    <div class="card card-accent">
+      <pre>Вопрос 1. ИНСТРУКЦИИ: что выросло?
+  Вспомните правило постоянного размера: хотите добавить —
+  найдите, что удалить. Правила, которым месяц не следовали
+  или которые описывают ушедшие процессы, — в _archive.
+  (Детали — в уроке 3.4.)
+
+Вопрос 2. РОЛИ: кто чем на самом деле занимается?
+  Планировщик стал исполнителем? Проверяющий снисходителен?
+  Сверьте распределение ролей с реальностью журнала
+  инцидентов: где разрыв, там и править.
+
+Вопрос 3. ДОСТУПЫ: что агенту больше не нужно?
+  Доступы, выданные «на время», остаются навсегда.
+  Пройдитесь по тому, что агент может трогать: папки, почты,
+  таблицы. Лишнее — отобрать. Доступ без задачи — риск.
+
+Вопрос 4. МЕТРИКИ: стало ли лучше?
+  Два числа раз в месяц: доля задач, сданных с первого раза
+  (без возвратов проверяющего), и время приёмки одной задачи.
+  Растут — система зреет. Падают — смотрите журнал инцидентов
+  и чините по лестнице ремонта (урок 3.3).</pre>
+    </div>
+
+    <h3>Чек-лист зрелости: где ваша система сейчас</h3>
+    <div class="card">
+      <table>
+        <tr><th>Уровень</th><th>Признак</th><th>Если ещё нет</th></tr>
+        <tr><td>🌱 Новичок</td><td>Проверяете каждый результат; агент «забывает» решения</td><td>Уровни 0–1 курса: приёмка по фактам, папка проекта</td></tr>
+        <tr><td>🌿 Уверенный</td><td>Задачи с постусловиями; инциденты записаны; холодный старт проходится</td><td>Уровни 2–3: договор задачи, диагностика, журнал</td></tr>
+        <tr><td>🌳 Дирижёр</td><td>Роли разделены; контрольные точки работают; чистка — ритуал</td><td>Уровень 4: роли, вопросы, месячный регламент</td></tr>
+      </table>
+    </div>
+    <p>Чек-лист нужен не для оценки «насколько вы хороши», а для выбора следующего шага. Каждая ступень опирается на предыдущую: дирижёр без приёмки по фактам — дирижёр над оркестром, который играет фальшь.</p>
+
+    <h3>Куда расти дальше</h3>
+    <div class="card card-success">
+      <ul>
+        <li><strong>Автоматизация проверок.</strong> Те сверки, которые вы делаете руками каждый раз, — кандидаты в скрипты. Ступень 5 лестницы ремонта (урок 3.3) — только после того, как процесс стабилен вручную.</li>
+        <li><strong>Библиотека шаблонов.</strong> Постусловия и чек-листы, отработанные на десятках задач, — ваш капитал. Шаблон «сравнение цен», «ответ контрагенту», «разбор претензии» берутся из папки, а не пишутся заново.</li>
+        <li><strong>Обучение команды.</strong> Тот, кто прошёл этот курс, за неделю ставит коллегу на ту же систему: папка проекта, ритуалы, чек-лист зрелости.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- КАК ПРИМЕНИТЬ -->
+  <div class="section">
+    <h2>🛠️ Как применить</h2>
+    <div class="card card-accent">
+      <h3>Шаблон протокола месячной чистки</h3>
+      <pre>ДАТА: [первое число месяца, час, в календаре]
+УЧАСТНИКИ: вы + агент (он готовит сводку заранее)
+
+1. Сводка агента: инциденты за месяц, топ-3 повтора
+2. Инструкции: добавлено X / удалено Y (бюджет строк соблюдён)
+3. Роли: что изменилось, что закрепить в ИНСТРУКЦИИ.md
+4. Доступы: выдано / отобрано
+5. Метрики: сдача с первого раза __% (было __%), приёмка __ мин
+6. Решения месяца → запись в РЕШЕНИЯ.md
+7. Одно улучшение на следующий месяц — только одно</pre>
+    </div>
+    <div class="card card-success">
+      <h4>🧑‍💼 Руководитель</h4>
+      <p>Привяжите чистку к существующему ритуалу — планёрке первого числа. Агент готовит сводку к началу встречи; вы принимаете решения. Через квартал сравните метрики — это и есть ответ на вопрос «а окупаются ли эти ваши агенты».</p>
+    </div>
+    <div class="card card-success">
+      <h4>🛒 Закупщик</h4>
+      <p>Вне тендерного сезона чистка глубже: пересмотр списка поставщиков, архивация прошлогодних КП, обновление шаблонов. В сезон — короткая версия: метрики и журнал, полчаса.</p>
+    </div>
+  </div>
+
+  <!-- ЧЕКЛИСТ -->
+  <div class="section">
+    <h2>✅ Чеклист принятия результата</h2>
+    <ul class="checklist">
+      <li>Чистка стоит в календаре: первое число месяца, час, отдельное событие</li>
+      <li>По итогам есть протокол: инструкции, роли, доступы, метрики, одно улучшение</li>
+      <li>Два числа считаются каждый месяц: сдача с первого раза, время приёмки</li>
+      <li>Я знаю, на какой ступени чек-листа зрелости нахожусь, и что следующее</li>
+    </ul>
+  </div>
+
+  <!-- КВИЗ -->
+  <div class="section">
+    <h2>📝 Проверка понимания</h2>
+    <div class="card card-accent">
+      <p><strong>Вопрос 1:</strong> Почему чистку нельзя делать «заодно» с рабочими задачами?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Потому что агент устаёт</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Конфликт целей: рабочая задача всегда важнее, чистка откладывается — поэтому отдельная сессия и слот в календаре</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Это можно, если работать быстро</div>
+      <div class="result" id="result1"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 2:</strong> Какие два числа показывают, что система со агентами зреет?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Количество чатов с агентом и потраченные токены</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Доля задач, сданных с первого раза, и время приёмки одной задачи</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Число инструкций и правил в ИНСТРУКЦИИ.md</div>
+      <div class="result" id="result2"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 3:</strong> Что делать в первую очередь, если метрики падают второй месяц подряд?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Сменить нейросеть</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Открыть журнал инцидентов, найти повторяющийся слой и чинить по лестнице ремонта от дешёвого</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Добавить больше контрольных точек</div>
+      <div class="result" id="result3"></div>
+    </div>
+  </div>
+
+  <!-- ГЛАВНОЕ -->
+  <div class="section">
+    <div class="card card-success">
+      <h3>🎯 Главное из урока — и из всего курса</h3>
+      <p><strong>Агент без упряжи — балерина без репетиций: красиво, но на сцене падает.</strong> Вы прошли весь путь: сделано — это факт (уровень 0), память — это файлы (уровень 1), задача — это договор (уровень 2), отказ — это адрес, а не приговор (уровень 3), а вы — дирижёр, а не сиделка (уровень 4). Держите чистку в календаре — и оркестр будет играть годами.</p>
+    </div>
+  </div>
+
+  <div class="nav-footer">
+    <a href="../04-checkpoint-questions/index.html" class="nav-btn">← Предыдущий урок</a>
+    <a href="../../catalog.html" class="nav-btn primary">К каталогу уроков →</a>
+  </div>
+
+</article>
+<footer>
+  <div class="container">
+    <p>© 2026 Artur A. · ИИ-агенты на практике</p>
+  </div>
+</footer>
+
+<script>
+function checkAnswer(element, isCorrect) {
+  const card = element.closest('.card');
+  const options = card.querySelectorAll('.quiz-option');
+  const resultDiv = card.querySelector('.result');
+  if (isCorrect) {
+    options.forEach(opt => {
+      opt.style.pointerEvents = 'none';
+      if (opt === element) opt.classList.add('correct');
+      else opt.classList.add('disabled');
+    });
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(16,185,129,0.1)';
+    resultDiv.style.border = '1px solid var(--success)';
+    resultDiv.innerHTML = '<strong>✅ Правильно!</strong>';
+  } else {
+    element.classList.add('wrong');
+    element.style.pointerEvents = 'none';
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(245,158,11,0.1)';
+    resultDiv.style.border = '1px solid var(--warning)';
+    resultDiv.innerHTML = '<strong>⚠️ Не совсем. Попробуйте другой вариант.</strong>';
+  }
+}
+</script>
+
+</body>
+</html>
