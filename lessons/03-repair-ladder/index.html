@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>3.3 · Лестница ремонта — ИИ-агенты на практике</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+  :root { --bg: #0B0F19; --card: #111827; --text: #F3F4F6; --muted: #9CA3AF; --accent: #8B5CF6; --accent2: #06B6D4; --border: rgba(255,255,255,0.08); --success: #10B981; --warning: #F59E0B; --danger: #EF4444; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; margin: 0; overflow-x: hidden; }
+  .container { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+  header { padding: 16px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  .lesson-header { padding: 32px 0 16px; }
+  .lesson-header .phase { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+  .lesson-header h1 { margin: 8px 0; font-size: 1.8rem; line-height: 1.25; }
+  .lesson-header .meta { color: var(--muted); font-size: 0.9rem; }
+  .section { margin: 28px 0; }
+  .section h2 { color: var(--accent); font-size: 1.2rem; margin-bottom: 12px; }
+  .section h3 { color: var(--accent2); font-size: 1.05rem; margin: 20px 0 10px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 14px 0; }
+  .card-accent { border-left: 4px solid var(--accent); }
+  .card-success { border-left: 4px solid var(--success); }
+  .card-warning { border-left: 4px solid var(--warning); }
+  .highlight { background: rgba(139,92,246,0.1); padding: 2px 6px; border-radius: 4px; }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 8px 0; padding-left: 28px; position: relative; }
+  .checklist li:before { content: "☐"; position: absolute; left: 0; color: var(--accent); }
+  .example { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); border-radius: 8px; padding: 14px; margin: 12px 0; }
+  .example-label { color: var(--accent2); font-size: 0.75rem; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .nav-footer { display: flex; justify-content: space-between; padding: 32px 0; border-top: 1px solid var(--border); margin-top: 32px; flex-wrap: wrap; gap: 8px; }
+  .nav-btn { padding: 10px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); text-decoration: none; transition: all 0.2s; }
+  .nav-btn:hover { border-color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); border-color: var(--accent); }
+  footer { padding: 32px 16px; text-align: center; color: var(--muted); border-top: 1px solid var(--border); }
+  .card + .card { margin-top: 40px; }
+  .quiz-option + .quiz-option { margin-top: 8px; }
+  .card-accent:has(.quiz-option) { border-left: none; border-top: 3px solid var(--accent); }
+  .quiz-option { display: block; word-wrap: break-word; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; cursor: pointer; transition: all 0.2s; }
+  .quiz-option:hover { border-color: var(--accent); }
+  .quiz-option.correct { border-color: var(--success); background: rgba(16,185,129,0.1); }
+  .quiz-option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.1); }
+  .quiz-option.disabled { opacity: 0.5; pointer-events: none; }
+  .result { display: none; padding: 16px; border-radius: 8px; margin: 16px 0; }
+  .result.show { display: block; }
+  pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; }
+  ul, ol { padding-left: 20px; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.9rem; }
+  th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--accent); font-weight: 600; }
+  .compare-box { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  .compare-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  @media (max-width: 768px) {
+    .lesson-header h1 { font-size: 1.4rem; }
+    .compare-box { grid-template-columns: 1fr; }
+    .nav-footer { flex-direction: column; }
+    .nav-btn { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <a href="../../index.html" class="logo">🧠 ИИ-агенты на практике</a>
+    <a href="../../catalog.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">← Каталог</a> <span style="color: var(--border); margin: 0 8px;">|</span> <a href="../../glossary.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">📖 Термины</a>
+  </div>
+</header>
+
+<article class="container">
+
+  <div class="lesson-header">
+    <div class="phase">🔧 УРОВЕНЬ 3 · ДИАГНОСТИКА: ПОЧЕМУ АГЕНТ ТУПИТ</div>
+    <h1>3.3 · Лестница ремонта: от дешёвого к дорогому</h1>
+    <div class="meta">🎯 Без кода · ✅ Интерактивный квиз · ⏱️ ~12 минут</div>
+  </div>
+
+  <!-- ЗАЧЕМ -->
+  <div class="section">
+    <h2>🎯 Зачем это бизнесу</h2>
+    <p>Слой отказа найден (урок 3.1), дыры в упряжи прощупаны (урок 3.2). Остался вопрос: как чинить. Подрядчик сразу предлагает «поменять всё» — и самый дорогой ремонт в списке: другую нейросеть. Протокол чинит иначе: начинает с бесплатного и движется вверх только тогда, когда нижняя ступень не помогла.</p>
+  </div>
+
+  <!-- ЧТО ИЗУЧАЕМ -->
+  <div class="section">
+    <h2>📚 Что изучаем</h2>
+
+    <h3>Шесть ступеней лестницы</h3>
+    <div class="card">
+      <table>
+        <tr><th>#</th><th>Ремонт</th><th>Цена</th><th>Что делать</th></tr>
+        <tr><td>1</td><td><strong>Сузить задачу</strong></td><td>Бесплатно</td><td>Одна позиция вместо двенадцати. Эффект быстрее всего (урок 2.4)</td></tr>
+        <tr><td>2</td><td><strong>Добавить постусловие</strong></td><td>Одна проверка</td><td>Одна строка «сделано, когда…» снимает целый класс ложных «готово» (урок 2.2)</td></tr>
+        <tr><td>3</td><td><strong>Починить состояние</strong></td><td>Час на файлы</td><td>ПРОГРЕСС.md и РЕШЕНИЯ.md приведены в порядок — снимает повторную работу (урок 1.3)</td></tr>
+        <tr><td>4</td><td><strong>Переписать инструкции как навигатор</strong></td><td>День</td><td>ИНСТРУКЦИЯ.md отвечает не на всё, а «где смотреть»: отсылка к файлам</td></tr>
+        <tr><td>5</td><td><strong>Автоматизировать цикл</strong></td><td>Неделя</td><td>Проверки, которые агент делает руками — скриптами. Окупается только после ступеней 1–4</td></tr>
+        <tr><td>6</td><td><strong>Менять модель</strong></td><td>Самый дорогой</td><td>Последним, с замером до/после. Иначе не узнаете, помогло ли</td></tr>
+      </table>
+    </div>
+    <div class="card card-warning">
+      <p><strong>Метод одного отключения.</strong> Перед ремонтом выключите ровно один элемент упряжи и повторите задачу. Не изменилось — элемент мёртв, чинить нечего, удалить. Проснулось — нашли несущую конструкцию: записать в инструкцию и защитить тестом холодного старта. Порядок отключения: инструкции → состояние → верификация.</p>
+    </div>
+
+    <h3>Красные пометки: ошибка должна учить</h3>
+    <p>Плохой проверяющий ставит крестик. Хороший пишет на полях, как надо. Разница в том, закроет ли агент ошибку сам в следующий раз:</p>
+    <div class="card card-accent">
+      <pre>✗ Плохо:   «Не получилось»
+✗ Хуже:    «Ошибка: файл не найден»
+✓ Хорошо:  «ЧТО: не сохранилась итоговая таблица.
+            ПОЧЕМУ: агент не знал, куда сохранять — папки
+            результата нет в шаблоне.
+            ЧТО ДЕЛАТЬ: добавить в ИНСТРУКЦИЯ.md пункт
+            «результат → /итоги/дата_название» и проверку
+            существования файла в постусловие»</pre>
+    </div>
+    <p>Записанная так ошибка — это бесплатный урок: её исправление становится частью упряжи, а не вашей личной памяти.</p>
+  </div>
+
+  <!-- КАК ПРИМЕНИТЬ -->
+  <div class="section">
+    <h2>🛠️ Как применить</h2>
+    <div class="card card-success">
+      <h4>📊 Финансист</h4>
+      <p>Агент ошибся в расчёте. Ступень 1: сузить — посчитать одну строку вручную и сверить. Сошлось? Проблема была в ширине задачи. Не сошлось → ступень 2: постусловие «итог = сумма по строкам, сверено с выгрузкой» → ступень 3: актуализирован ПРОГРЕСС.md с формулой расчёта.</p>
+    </div>
+    <div class="card card-success">
+      <h4>👥 HR</h4>
+      <p>Агент дважды упустил раздел «опыт в отрасли» из шаблона. Инстинкт: «модель слабая». Лестница: сузить (одно резюме) → постусловие (по каждому кандидату — все 6 разделов шаблона отмечены) → состояние (актуальный шаблон в папке, версия в имени). Чаще всего хватает ступеней 1–3 — модель не трогаем.</p>
+    </div>
+  </div>
+
+  <!-- ЧЕКЛИСТ -->
+  <div class="section">
+    <h2>✅ Чеклист принятия результата</h2>
+    <ul class="checklist">
+      <li>Я начинаю ремонт со ступени 1 и поднимаюсь только по необходимости</li>
+      <li>Смена модели — последняя ступень, с замером результата до и после</li>
+      <li>Перед ремонтом выключаю один элемент и проверяю, живой ли он</li>
+      <li>Каждая найденная ошибка записана в формате «что / почему / что делать»</li>
+    </ul>
+  </div>
+
+  <!-- КВИЗ -->
+  <div class="section">
+    <h2>📝 Проверка понимания</h2>
+    <div class="card card-accent">
+      <p><strong>Вопрос 1:</strong> Правильный порядок ремонта?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Сначала сменить модель — это решает всё</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Сузить задачу → постусловие → состояние → инструкции → автоматизация → модель последней</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Сначала автоматизировать всё, потом разбираться</div>
+      <div class="result" id="result1"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 2:</strong> Вы выключили один элемент упряжи, задача не изменилась. Вывод?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Элемент важный — усиливать его</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Элемент мёртв — удалить или не тратить на него ремонт</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Нужно отключить ещё пять элементов</div>
+      <div class="result" id="result2"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 3:</strong> Как правильно записать инцидент?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) «Ошибка, переделать»</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) «Что случилось / почему / что сделать, чтобы не повторилось»</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Не записывать — и так помню</div>
+      <div class="result" id="result3"></div>
+    </div>
+  </div>
+
+  <!-- ГЛАВНОЕ -->
+  <div class="section">
+    <div class="card card-success">
+      <h3>🎯 Главное из урока</h3>
+      <p><strong>Чините снизу вверх: бесплатное раньше дорогого, модель — в самом конце.</strong> Девять из десяти «тупых нейросетей» чинятся сужением задачи, постусловием и порядком в файлах. И каждая починка должна оставить запись в формате «что / почему / что делать».</p>
+    </div>
+  </div>
+
+  <div class="nav-footer">
+    <a href="../03-cold-start-test/index.html" class="nav-btn">← Предыдущий урок</a>
+    <a href="../03-incident-log/index.html" class="nav-btn primary">Следующий урок →</a>
+  </div>
+
+</article>
+<footer>
+  <div class="container">
+    <p>© 2026 Artur A. · ИИ-агенты на практике</p>
+  </div>
+</footer>
+
+<script>
+function checkAnswer(element, isCorrect) {
+  const card = element.closest('.card');
+  const options = card.querySelectorAll('.quiz-option');
+  const resultDiv = card.querySelector('.result');
+  if (isCorrect) {
+    options.forEach(opt => {
+      opt.style.pointerEvents = 'none';
+      if (opt === element) opt.classList.add('correct');
+      else opt.classList.add('disabled');
+    });
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(16,185,129,0.1)';
+    resultDiv.style.border = '1px solid var(--success)';
+    resultDiv.innerHTML = '<strong>✅ Правильно!</strong>';
+  } else {
+    element.classList.add('wrong');
+    element.style.pointerEvents = 'none';
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(245,158,11,0.1)';
+    resultDiv.style.border = '1px solid var(--warning)';
+    resultDiv.innerHTML = '<strong>⚠️ Не совсем. Попробуйте другой вариант.</strong>';
+  }
+}
+</script>
+
+</body>
+</html>

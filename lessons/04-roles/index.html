@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>4.1 · Роли: планировщик, исполнитель, проверяющий — ИИ-агенты на практике</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+  :root { --bg: #0B0F19; --card: #111827; --text: #F3F4F6; --muted: #9CA3AF; --accent: #8B5CF6; --accent2: #06B6D4; --border: rgba(255,255,255,0.08); --success: #10B981; --warning: #F59E0B; --danger: #EF4444; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; margin: 0; overflow-x: hidden; }
+  .container { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+  header { padding: 16px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  .lesson-header { padding: 32px 0 16px; }
+  .lesson-header .phase { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+  .lesson-header h1 { margin: 8px 0; font-size: 1.8rem; line-height: 1.25; }
+  .lesson-header .meta { color: var(--muted); font-size: 0.9rem; }
+  .section { margin: 28px 0; }
+  .section h2 { color: var(--accent); font-size: 1.2rem; margin-bottom: 12px; }
+  .section h3 { color: var(--accent2); font-size: 1.05rem; margin: 20px 0 10px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 14px 0; }
+  .card-accent { border-left: 4px solid var(--accent); }
+  .card-success { border-left: 4px solid var(--success); }
+  .card-warning { border-left: 4px solid var(--warning); }
+  .highlight { background: rgba(139,92,246,0.1); padding: 2px 6px; border-radius: 4px; }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 8px 0; padding-left: 28px; position: relative; }
+  .checklist li:before { content: "☐"; position: absolute; left: 0; color: var(--accent); }
+  .example { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); border-radius: 8px; padding: 14px; margin: 12px 0; }
+  .example-label { color: var(--accent2); font-size: 0.75rem; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .nav-footer { display: flex; justify-content: space-between; padding: 32px 0; border-top: 1px solid var(--border); margin-top: 32px; flex-wrap: wrap; gap: 8px; }
+  .nav-btn { padding: 10px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); text-decoration: none; transition: all 0.2s; }
+  .nav-btn:hover { border-color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); border-color: var(--accent); }
+  footer { padding: 32px 16px; text-align: center; color: var(--muted); border-top: 1px solid var(--border); }
+  .card + .card { margin-top: 40px; }
+  .quiz-option + .quiz-option { margin-top: 8px; }
+  .card-accent:has(.quiz-option) { border-left: none; border-top: 3px solid var(--accent); }
+  .quiz-option { display: block; word-wrap: break-word; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; cursor: pointer; transition: all 0.2s; }
+  .quiz-option:hover { border-color: var(--accent); }
+  .quiz-option.correct { border-color: var(--success); background: rgba(16,185,129,0.1); }
+  .quiz-option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.1); }
+  .quiz-option.disabled { opacity: 0.5; pointer-events: none; }
+  .result { display: none; padding: 16px; border-radius: 8px; margin: 16px 0; }
+  .result.show { display: block; }
+  pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; }
+  ul, ol { padding-left: 20px; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.9rem; }
+  th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--accent); font-weight: 600; }
+  .compare-box { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  .compare-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  @media (max-width: 768px) {
+    .lesson-header h1 { font-size: 1.4rem; }
+    .compare-box { grid-template-columns: 1fr; }
+    .nav-footer { flex-direction: column; }
+    .nav-btn { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <a href="../../index.html" class="logo">🧠 ИИ-агенты на практике</a>
+    <a href="../../catalog.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">← Каталог</a> <span style="color: var(--border); margin: 0 8px;">|</span> <a href="../../glossary.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">📖 Термины</a>
+  </div>
+</header>
+
+<article class="container">
+
+  <div class="lesson-header">
+    <div class="phase">🪄 УРОВЕНЬ 4 · ДИРИЖЁР АГЕНТОВ: ОРКЕСТРАЦИЯ БЕЗ КОДА</div>
+    <h1>4.1 · Роли: планировщик → исполнитель → проверяющий</h1>
+    <div class="meta">🎯 Без кода · ✅ Интерактивный квиз · ⏱️ ~12 минут</div>
+  </div>
+
+  <!-- ЗАЧЕМ -->
+  <div class="section">
+    <h2>🎯 Зачем это бизнесу</h2>
+    <p>Уровень 2 дал правило «один агент — одна задача». Но что, если одна задача большая: разбор тендера, запуск кампании, подготовка годового отчёта? Делать всё одним агентом — значит, что он сам ставит себе цели, сам исполняет, сам хвалит себя за результат.</p>
+    <p>Студент не проверяет собственную контрольную. Тот, кто писал текст, уже убедил себя в его правильности — помните эффект адвоката из урока 0.2. Поэтому большие задачи делятся между <strong>ролями</strong> — как у оркестра: дирижёр не играет на скрипке, скрипач не оценивает партию трубы.</p>
+  </div>
+
+  <!-- ЧТО ИЗУЧАЕМ -->
+  <div class="section">
+    <h2>📚 Что изучаем</h2>
+
+    <h3>Три роли вместо одного «сделай всё»</h3>
+    <div class="card">
+      <table>
+        <tr><th>Роль</th><th>Что делает</th><th>Чего НЕ делает</th></tr>
+        <tr><td><strong>🧭 Планировщик</strong></td><td>Разбивает большую задачу на шаги, определяет порядок, заводит постусловия</td><td>Не выполняет шаги сам</td></tr>
+        <tr><td><strong>🔨 Исполнитель</strong></td><td>Делает один шаг за раз, сдаёт по постусловию</td><td>Не решает, что делать дальше, и не оценивает свой результат</td></tr>
+        <tr><td><strong>🔍 Проверяющий</strong></td><td>Принимает шаг по чек-листу и постусловию; пишет замечания</td><td>Не переписывает работу заново — возвращает на доработку</td></tr>
+      </table>
+    </div>
+    <p>Роли могут жить в одном агенте — как костюмы в гардеробной: сменил роль, сменил инструкцию. А могут — в разных агентах или разных сессиях. Принципиально важно одно: <strong>проверяющий не видит рассуждений исполнителя</strong>. Иначе он унаследует их уверенность.</p>
+
+    <h3>Как это устроено без программирования</h3>
+    <div class="card card-accent">
+      <pre>Шаг 1. Планировщик пишет план в ПРОГРЕСС.md:
+       шаги, у каждого — постусловие (урок 2.2)
+Шаг 2. Исполнитель берёт ОДИН шаг (урок 2.4),
+       делает, сдаёт результат + отметки по постусловию
+Шаг 3. Проверяющий смотрит результат в чистой сессии:
+       по чек-листу, выборочная сверка (урок 0.3).
+       Принял → запись в ПРОГРЕСС.md → следующий шаг.
+       Не принял → замечание в формате
+       «что / почему / что делать» (урок 3.3)
+Шаг 4. Контрольная точка между шагами,
+       меняющими файлы (урок 1.4)</pre>
+    </div>
+
+    <h3>Разделение ролей — главный антидот против разрыва</h3>
+    <p>В курсе упряжи есть измеримая величина — <span class="highlight">верификационный разрыв</span>: сколько раз агент заявил «готово», а независимая проверка нашла ошибку. У команд без разделения ролей он составляет заметную долю всех задач. Разделение «исполнил ≠ проверял» схлопывает разрыв, потому что проверяющий не заинтересован в красивом результате — только в соответствии чек-листу.</p>
+    <div class="card card-warning">
+      <p><strong>Две ловушки.</strong> (1) Проверяющий слишком снисходителен — «и так сойдёт». Лечение: у проверяющего есть только два вердикта — «принято» или «возвращено с замечанием», без третьего. (2) Ролей стало больше трёх-четырёх — планировщик, исполнитель, проверяющий и пара специалистов. Дальше — бюрократия: каждая передача роли стоит времени. Начинайте с трёх.</p>
+    </div>
+  </div>
+
+  <!-- КАК ПРИМЕНИТЬ -->
+  <div class="section">
+    <h2>🛠️ Как применить</h2>
+    <div class="card card-success">
+      <h4>🛒 Закупщик: разбор тендера</h4>
+      <p>Планировщик: список документов и сроки. Исполнитель: заполняет по одной форме. Проверяющий: сверяет каждую форму с требованиями закупки. Сдавали «пакетом» и ловили замечания комиссии — сдаёте по формам, замечаний в разы меньше.</p>
+    </div>
+    <div class="card card-success">
+      <h4>📢 PR: кампания из шести текстов</h4>
+      <p>Планировщик — контент-план с постусловиями на каждый текст. Исполнитель пишет по одному тексту. Проверяющий (свежая сессия) — по бренд-чек-листу: тон, обещания, цифры. Текст, который «сам себя проверял», выглядел гладко и содержал три фактические ошибки.</p>
+    </div>
+    <div class="card card-success">
+      <h4>📊 Финансист: годовой отчёт</h4>
+      <p>Разделы — шагами. Исполнитель считает раздел, проверяющий сверяет с выгрузками. Главное правило уровня 0 в действии: отчёт, который никто не сверил, — это рассказ про цифры.</p>
+    </div>
+  </div>
+
+  <!-- ЧЕКЛИСТ -->
+  <div class="section">
+    <h2>✅ Чеклист принятия результата</h2>
+    <ul class="checklist">
+      <li>Большие задачи разбиты на шаги с постусловиями в ПРОГРЕСС.md</li>
+      <li>Проверяющий работает в чистой сессии и не видит рассуждений исполнителя</li>
+      <li>У проверяющего два вердикта: «принято» или «возвращено с замечанием»</li>
+      <li>Ролей не больше четырёх — больше это уже бюрократия</li>
+    </ul>
+  </div>
+
+  <!-- КВИЗ -->
+  <div class="section">
+    <h2>📝 Проверка понимания</h2>
+    <div class="card card-accent">
+      <p><strong>Вопрос 1:</strong> Почему исполнитель не должен проверять свой результат?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Он недостаточно опытный для проверки</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Он уже убедил себя в правильности — эффект адвоката; проверка будет нечестной</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Чтобы занять ещё одного агента</div>
+      <div class="result" id="result1"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 2:</strong> Какое главное условие для роли проверяющего?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Он старше по опыту, чем исполнитель</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Чистая сессия, чужой результат, чек-лист; рассуждений автора не видит</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Он должен переписать результат заново, если не понравился</div>
+      <div class="result" id="result2"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 3:</strong> Что такое верификационный разрыв?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Разница между плановым и фактическим временем задачи</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Доля случаев, когда агент заявил «готово», а независимая проверка нашла ошибку</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Расстояние между двумя нейросетями</div>
+      <div class="result" id="result3"></div>
+    </div>
+  </div>
+
+  <!-- ГЛАВНОЕ -->
+  <div class="section">
+    <div class="card card-success">
+      <h3>🎯 Главное из урока</h3>
+      <p><strong>Большую задачу играет оркестр, а не солист.</strong> Планировщик ставит шаги, исполнитель делает по одному, проверяющий принимает в чистой сессии по чек-листу. Разделение «писал ≠ проверял» — главный способ схлопнуть верификационный разрыв, который иначе съедает треть ваших результатов.</p>
+    </div>
+  </div>
+
+  <div class="nav-footer">
+    <a href="../03-incident-log/index.html" class="nav-btn">← Предыдущий урок</a>
+    <a href="../04-checkpoint-questions/index.html" class="nav-btn primary">Следующий урок →</a>
+  </div>
+
+</article>
+<footer>
+  <div class="container">
+    <p>© 2026 Artur A. · ИИ-агенты на практике</p>
+  </div>
+</footer>
+
+<script>
+function checkAnswer(element, isCorrect) {
+  const card = element.closest('.card');
+  const options = card.querySelectorAll('.quiz-option');
+  const resultDiv = card.querySelector('.result');
+  if (isCorrect) {
+    options.forEach(opt => {
+      opt.style.pointerEvents = 'none';
+      if (opt === element) opt.classList.add('correct');
+      else opt.classList.add('disabled');
+    });
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(16,185,129,0.1)';
+    resultDiv.style.border = '1px solid var(--success)';
+    resultDiv.innerHTML = '<strong>✅ Правильно!</strong>';
+  } else {
+    element.classList.add('wrong');
+    element.style.pointerEvents = 'none';
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(245,158,11,0.1)';
+    resultDiv.style.border = '1px solid var(--warning)';
+    resultDiv.innerHTML = '<strong>⚠️ Не совсем. Попробуйте другой вариант.</strong>';
+  }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>0.1 · Разрыв между обещанным и реальным — ИИ-агенты на практике</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+  :root { --bg: #0B0F19; --card: #111827; --text: #F3F4F6; --muted: #9CA3AF; --accent: #8B5CF6; --accent2: #06B6D4; --border: rgba(255,255,255,0.08); --success: #10B981; --warning: #F59E0B; --danger: #EF4444; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; margin: 0; overflow-x: hidden; }
+  .container { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+  header { padding: 16px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  .lesson-header { padding: 32px 0 16px; }
+  .lesson-header .phase { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+  .lesson-header h1 { margin: 8px 0; font-size: 1.8rem; line-height: 1.25; }
+  .lesson-header .meta { color: var(--muted); font-size: 0.9rem; }
+  .section { margin: 28px 0; }
+  .section h2 { color: var(--accent); font-size: 1.2rem; margin-bottom: 12px; }
+  .section h3 { color: var(--accent2); font-size: 1.05rem; margin: 20px 0 10px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 14px 0; }
+  .card-accent { border-left: 4px solid var(--accent); }
+  .card-success { border-left: 4px solid var(--success); }
+  .card-warning { border-left: 4px solid var(--warning); }
+  .highlight { background: rgba(139,92,246,0.1); padding: 2px 6px; border-radius: 4px; }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 8px 0; padding-left: 28px; position: relative; }
+  .checklist li:before { content: "☐"; position: absolute; left: 0; color: var(--accent); }
+  .example { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); border-radius: 8px; padding: 14px; margin: 12px 0; }
+  .example-label { color: var(--accent2); font-size: 0.75rem; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .nav-footer { display: flex; justify-content: space-between; padding: 32px 0; border-top: 1px solid var(--border); margin-top: 32px; flex-wrap: wrap; gap: 8px; }
+  .nav-btn { padding: 10px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); text-decoration: none; transition: all 0.2s; }
+  .nav-btn:hover { border-color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); border-color: var(--accent); }
+  footer { padding: 32px 16px; text-align: center; color: var(--muted); border-top: 1px solid var(--border); }
+  .card + .card { margin-top: 40px; }
+  .quiz-option + .quiz-option { margin-top: 8px; }
+  .card-accent:has(.quiz-option) { border-left: none; border-top: 3px solid var(--accent); }
+  .quiz-option { display: block; word-wrap: break-word; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; cursor: pointer; transition: all 0.2s; }
+  .quiz-option:hover { border-color: var(--accent); }
+  .quiz-option.correct { border-color: var(--success); background: rgba(16,185,129,0.1); }
+  .quiz-option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.1); }
+  .quiz-option.disabled { opacity: 0.5; pointer-events: none; }
+  .result { display: none; padding: 16px; border-radius: 8px; margin: 16px 0; }
+  .result.show { display: block; }
+  pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; }
+  ul, ol { padding-left: 20px; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.9rem; }
+  th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--accent); font-weight: 600; }
+  .compare-box { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  .compare-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  @media (max-width: 768px) {
+    .lesson-header h1 { font-size: 1.4rem; }
+    .compare-box { grid-template-columns: 1fr; }
+    .nav-footer { flex-direction: column; }
+    .nav-btn { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <a href="../../index.html" class="logo">🧠 ИИ-агенты на практике</a>
+    <a href="../../catalog.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">← Каталог</a> <span style="color: var(--border); margin: 0 8px;">|</span> <a href="../../glossary.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">📖 Термины</a>
+  </div>
+</header>
+
+<article class="container">
+
+  <div class="lesson-header">
+    <div class="phase">🎯 УРОВЕНЬ 0 · «СКАЗАЛ ГОТОВО» ≠ «СДЕЛАНО»</div>
+    <h1>0.1 · Разрыв между обещанным и реальным</h1>
+    <div class="meta">🎯 Без кода · ✅ Интерактивный квиз · ⏱️ ~10 минут</div>
+  </div>
+
+  <!-- ЗАЧЕМ БИЗНЕСУ -->
+  <div class="section">
+    <h2>🎯 Зачем это бизнесу</h2>
+    <p>Вы поручили ИИ задачу. ИИ ответил: <strong>«Готово!»</strong> Вы переслали результат руководителю — а там дыра: цифра не та, файл не приложен, вывод противоречит исходным данным.</p>
+    <p>ИИ не солгал. Он честно сообщил то, что «помнит». Но помнит он не всегда то, что сделал. Разрыв между «агент сказал, что сделал» и «реально сделано» называется <span class="highlight">разрывом проверки</span>. У тех, кто не проверяет результаты ИИ, он доходит до 30–50% задач.</p>
+    <div class="card card-warning">
+      <p><strong>Это не недостаток одной нейросети.</strong> ChatGPT, Claude, Kimi, Gemini — все устроены одинаково: они генерируют убедительный ответ, а не отчёт о фактах. Вопрос не «верить или не верить», а «как устроена проверка».</p>
+    </div>
+  </div>
+
+  <!-- ЧТО ИЗУЧАЕМ -->
+  <div class="section">
+    <h2>📚 Что изучаем</h2>
+
+    <h3>«Готово» — это слово, а не факт</h3>
+    <div class="example">
+      <div class="example-label">Пример</div>
+      <p><strong>Вы:</strong> Сравни 12 коммерческих предложений и составь таблицу.</p>
+      <p><strong>ИИ:</strong> «Проанализировал 12 предложений, таблица готова!»</p>
+      <p><strong>Реальность:</strong> в таблице 9 предложений, у трёх цены устаревшие, а самое выгодное КП в выборку не попало.</p>
+    </div>
+    <p>ИИ не врал — он искренне «помнил», что задачу завершил. Насколько искренне и почему это происходит — разберём в уроке 0.2. Сейчас важно другое: <strong>ответ «готово» — это предположение, которое нуждается в проверке, а не сдача работы.</strong></p>
+
+    <h3>Разрыв проверки: замерьте свой</h3>
+    <div class="card">
+      <p>Заведите простой журнал на 10 задач:</p>
+      <table>
+        <tr><th>Задача</th><th>ИИ сказал «готово»</th><th>Я проверил факт</th><th>Совпало?</th></tr>
+        <tr><td>Сравнение КП поставщиков</td><td>да</td><td>да</td><td>⚠️ нет — 3 цены устарели</td></tr>
+        <tr><td>Резюме встречи</td><td>да</td><td>да</td><td>✅ да</td></tr>
+      </table>
+      <p>Доля несовпадений — ваш разрыв проверки. Без журнала все уверены, что «у нас-то всё нормально». С журналом спор о том, «проверять или нет», заканчивается: есть число.</p>
+    </div>
+
+    <h3>Почему «просто проверяйте» — плохой совет</h3>
+    <p>«Проверяйте результаты ИИ» не работает, потому что непонятно, <em>что именно</em> проверять. Нужны <strong>признаки готовности</strong> по каждому типу задач — их мы построим в уроке 0.3. Пока действует главное правило уровня:</p>
+    <div class="card card-success">
+      <p><strong>Результат считается готовым, когда он подтверждён фактом вне ИИ:</strong> файл лежит на месте, цифра сошлась с источником, запись появилась в системе. Всё остальное — «агент сказал».</p>
+    </div>
+  </div>
+
+  <!-- КАК ПРИМЕНИТЬ -->
+  <div class="section">
+    <h2>🛠️ Как применить</h2>
+    <p>Минимальная проверка занимает 2 минуты. Исправление ошибки после отправки руководителю — час и репутация.</p>
+
+    <div class="card card-success">
+      <h4>🛒 Закупщик</h4>
+      <p>ИИ сравнил КП → <strong>проверка:</strong> открыть 2–3 КП вручную и сверить ключевые цифры: цену, количество, условия оплаты.</p>
+    </div>
+    <div class="card card-success">
+      <h4>⚖️ Юрист</h4>
+      <p>ИИ проверил договор → <strong>проверка:</strong> открыть оригинал и найти указанные ИИ пункты. Они существуют? Сформулированы так, как написано?</p>
+    </div>
+    <div class="card card-success">
+      <h4>👥 HR</h4>
+      <p>ИИ отсортировал 50 резюме → <strong>проверка:</strong> прочитать топ-3 кандидата полностью. Совпадает с тем, что ИИ написал о них?</p>
+    </div>
+    <div class="card card-success">
+      <h4>🚚 Логист</h4>
+      <p>ИИ рассчитал ставку фрахта → <strong>проверка:</strong> сверить одну цифру — итоговую — с тарифом перевозчика.</p>
+    </div>
+  </div>
+
+  <!-- ЧЕКЛИСТ -->
+  <div class="section">
+    <h2>✅ Чеклист принятия результата</h2>
+    <ul class="checklist">
+      <li>Я понимаю: «ИИ сказал готово» — это не готовность</li>
+      <li>Я завёл журнал «сказал / проверил / совпало» на 10 задач</li>
+      <li>Для моих типовых задач я знаю, как выглядит факт готовности</li>
+      <li>Результат считаю готовым только после проверки фактом вне ИИ</li>
+    </ul>
+  </div>
+
+  <!-- КВИЗ -->
+  <div class="section">
+    <h2>📝 Проверка понимания</h2>
+    <div class="card card-accent">
+      <p><strong>Вопрос 1:</strong> Что такое «разрыв проверки»?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Разница в ценах между нейросетями</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Доля задач, где ИИ сказал «готово», а фактически задача выполнена не полностью или неверно</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Время, которое ИИ тратит на ответ</div>
+      <div class="result" id="result1"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 2:</strong> ИИ сообщил «анализ готов». Что это значит?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Задача выполнена, можно отправлять</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) ИИ считает, что задача выполнена, — это предположение, которое нужно проверить</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Нужно сменить нейросеть</div>
+      <div class="result" id="result2"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 3:</strong> Сколько задач нужно, чтобы замерить свой разрыв проверки?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Минимум 100</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Достаточно 10</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Одной достаточно</div>
+      <div class="result" id="result3"></div>
+    </div>
+  </div>
+
+  <!-- ГЛАВНОЕ -->
+  <div class="section">
+    <div class="card card-success">
+      <h3>🎯 Главное из урока</h3>
+      <p><strong>«Сказал готово» ≠ «Сделано».</strong> Разрыв проверки измеряется журналом, а не ощущениями. Готовность — это факт вне ИИ: файл на месте, цифра сошлась, запись в системе есть. Всё остальное — «агент сказал».</p>
+    </div>
+  </div>
+
+  <div class="nav-footer">
+    <a href="../../index.html" class="nav-btn">← На главную</a>
+    <a href="../00-confidence-trap/index.html" class="nav-btn primary">Следующий урок →</a>
+  </div>
+
+</article>
+<footer>
+  <div class="container">
+    <p>© 2026 Artur A. · ИИ-агенты на практике</p>
+  </div>
+</footer>
+
+<script>
+function checkAnswer(element, isCorrect) {
+  const card = element.closest('.card');
+  const options = card.querySelectorAll('.quiz-option');
+  const resultDiv = card.querySelector('.result');
+  if (isCorrect) {
+    options.forEach(opt => {
+      opt.style.pointerEvents = 'none';
+      if (opt === element) opt.classList.add('correct');
+      else opt.classList.add('disabled');
+    });
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(16,185,129,0.1)';
+    resultDiv.style.border = '1px solid var(--success)';
+    resultDiv.innerHTML = '<strong>✅ Правильно!</strong>';
+  } else {
+    element.classList.add('wrong');
+    element.style.pointerEvents = 'none';
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(245,158,11,0.1)';
+    resultDiv.style.border = '1px solid var(--warning)';
+    resultDiv.innerHTML = '<strong>⚠️ Не совсем. Попробуйте другой вариант.</strong>';
+  }
+}
+</script>
+
+</body>
+</html>
