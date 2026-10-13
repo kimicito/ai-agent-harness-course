@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>3.5 · Кейс: расследование, которое можно проверить — ИИ-агенты на практике</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+  :root { --bg: #0B0F19; --card: #111827; --text: #F3F4F6; --muted: #9CA3AF; --accent: #8B5CF6; --accent2: #06B6D4; --border: rgba(255,255,255,0.08); --success: #10B981; --warning: #F59E0B; --danger: #EF4444; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; margin: 0; overflow-x: hidden; }
+  .container { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+  header { padding: 16px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  .lesson-header { padding: 32px 0 16px; }
+  .lesson-header .phase { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+  .lesson-header h1 { margin: 8px 0; font-size: 1.8rem; line-height: 1.25; }
+  .lesson-header .meta { color: var(--muted); font-size: 0.9rem; }
+  .section { margin: 28px 0; }
+  .section h2 { color: var(--accent); font-size: 1.2rem; margin-bottom: 12px; }
+  .section h3 { color: var(--accent2); font-size: 1.05rem; margin: 20px 0 10px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 14px 0; }
+  .card-accent { border-left: 4px solid var(--accent); }
+  .card-success { border-left: 4px solid var(--success); }
+  .card-warning { border-left: 4px solid var(--warning); }
+  .highlight { background: rgba(139,92,246,0.1); padding: 2px 6px; border-radius: 4px; }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 8px 0; padding-left: 28px; position: relative; }
+  .checklist li:before { content: "☐"; position: absolute; left: 0; color: var(--accent); }
+  .example { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); border-radius: 8px; padding: 14px; margin: 12px 0; }
+  .example-label { color: var(--accent2); font-size: 0.75rem; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .nav-footer { display: flex; justify-content: space-between; padding: 32px 0; border-top: 1px solid var(--border); margin-top: 32px; flex-wrap: wrap; gap: 8px; }
+  .nav-btn { padding: 10px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); text-decoration: none; transition: all 0.2s; }
+  .nav-btn:hover { border-color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); border-color: var(--accent); }
+  footer { padding: 32px 16px; text-align: center; color: var(--muted); border-top: 1px solid var(--border); }
+  .card + .card { margin-top: 40px; }
+  .quiz-option + .quiz-option { margin-top: 8px; }
+  .card-accent:has(.quiz-option) { border-left: none; border-top: 3px solid var(--accent); }
+  .quiz-option { display: block; word-wrap: break-word; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; cursor: pointer; transition: all 0.2s; }
+  .quiz-option:hover { border-color: var(--accent); }
+  .quiz-option.correct { border-color: var(--success); background: rgba(16,185,129,0.1); }
+  .quiz-option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.1); }
+  .quiz-option.disabled { opacity: 0.5; pointer-events: none; }
+  .result { display: none; padding: 16px; border-radius: 8px; margin: 16px 0; }
+  .result.show { display: block; }
+  pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; }
+  ul, ol { padding-left: 20px; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.9rem; }
+  th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--accent); font-weight: 600; }
+  .compare-box { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  .compare-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  @media (max-width: 768px) {
+    .lesson-header h1 { font-size: 1.4rem; }
+    .compare-box { grid-template-columns: 1fr; }
+    .nav-footer { flex-direction: column; }
+    .nav-btn { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <a href="../../index.html" class="logo">🧠 ИИ-агенты на практике</a>
+    <a href="../../catalog.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">← Каталог</a> <span style="color: var(--border); margin: 0 8px;">|</span> <a href="../../glossary.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">📖 Термины</a>
+  </div>
+</header>
+
+<article class="container">
+
+  <div class="lesson-header">
+    <div class="phase">🔧 УРОВЕНЬ 3 · ДИАГНОСТИКА: ПОЧЕМУ АГЕНТ ТУПИТ</div>
+    <h1>3.5 · Кейс: расследование, которое можно проверить</h1>
+    <div class="meta">🎯 Без кода · ✅ Интерактивный квиз · ⏱️ ~14 минут · 🏭 разбор реального проекта</div>
+  </div>
+
+  <!-- ЗАЧЕМ -->
+  <div class="section">
+    <h2>🎯 Зачем это бизнесу</h2>
+    <p>Уроки 3.1–3.4 научили вас диагностировать <em>самого агента</em>. Этот урок — про зеркальную задачу: когда агент <em>сам</em> проводит расследование («почему упали продажи», «почему отвалился сервер»), как проверить, что его ответ — не красивая выдумка?</p>
+    <p>Ответ один: след расследования должен быть записан так, чтобы вы могли его перепроверить — каждый запрос к данным, каждую гипотезу, каждое опровержение. Это называется <span class="highlight">аудируемый агент</span>. Разберём реальный открытый проект, где это сделано в полный рост.</p>
+  </div>
+
+  <!-- КЕЙС -->
+  <div class="section">
+    <h2>🏭 Кейс: ИИ-помощник оператора котельной</h2>
+    <p>Открытый проект <strong>industrial-ai-troubleshooting-agent</strong> (автор Scott Duncan, лицензия Apache-2.0 — можно брать код свободно). ИИ-агент подключён к данным настоящего промышленного котла: 30 датчиков с шагом 5 секунд, журнал из 6005 аварийных сигналов, карта оборудования и библиотека из 62 заводских документов (инструкции, паспорта, гайды по неисправностям).</p>
+    <p>Оператор задаёт вопрос на обычном языке: <em>«Почему 28 марта в 11:10 упала температура пара до 517°C при норме 530–545?»</em> — и агент расследует.</p>
+
+    <h3>Как выглядит след расследования</h3>
+    <div class="card card-accent">
+      <pre>#7  ГИПОТЕЗА: ожидаю аварий вокруг 11:10 и отклонения
+      одного из датчиков выше по потоку
+#8  ЗАПРОС alarm_search_context(11:10, ±45 мин)
+    → 98 сигналов: расход первичного воздуха LoLo (критично),
+      кислород в дыме 1.99% (норма 3.5–5.5), вибрация дымососа
+#9  НАБЛЮДЕНИЕ: картина «обвал воздуха → нехватка O2»</pre>
+    </div>
+    <p>Здесь агент сделал то, что делают опытные инженеры, — и то, чего от ИИ обычно не ждут: <strong>пошёл проверять собственную первую гипотезу и честно её похоронил</strong>.</p>
+    <div class="card card-warning">
+      <pre>#12 ОПРОВЕРЖЕНИЕ: «обвал первичного воздуха в 11:09» —
+    расход был низким (~50 тыс. м³/ч при норме 90–135)
+    УЖЕ с 10:30, котёл час работал на половинной нагрузке.
+    Сигналы LoLo — просто касания порога, а не новая поломка.
+#13 ГИПОТЕЗА №2: проверить форсуночный перегреватель —
+    если клапан поливки открылся сильше нормы, он сам
+    остужает пар</pre>
+    </div>
+    <p>Вторая гипотеза тоже не подтвердилась: клапан реагировал <em>на</em> падение, пытаясь его остановить, а заводской гайд по дереву решений указал на сторону горения. Финальный вывод агент сформулировал с уровнем уверенности и списком того, чего не хватает для 100%:</p>
+    <div class="card card-success">
+      <pre>#19 ВЫВОД (уверенность 0.7, MEDIUM): корневая причина —
+    недостаток воздуха относительно топлива на полунагрузке.
+    Цепочка: O2 упал до 1.5% → горение бедное → меньше тепла
+    в перегреватель → −21°C за 7 минут → регулятор восстановил.
+    Чтобы поднять уверенность: данные подачи угля за 10:30–11:30.</pre>
+    </div>
+  </div>
+
+  <!-- МЕХАНИКА -->
+  <div class="section">
+    <h2>⚙️ Из чего собрана аудируемость</h2>
+    <div class="card">
+      <table>
+        <tr><th>Механика</th><th>Что даёт бизнесу</th></tr>
+        <tr><td>Каждый запрос к данным пишется в след <strong>автоматически</strong> — с аргументами и результатом</td><td>Агент не может «приукрасить задним числом», что он смотрел</td></tr>
+        <tr><td>Гипотеза — <strong>до</strong> запроса, наблюдение — после</td><td>Видно, расследование или угадывание</td></tr>
+        <tr><td>Опровержения пишутся так же обязательно, как подтверждения</td><td>Мёртвые версии не всплывут через месяц как «а мы об этом знали»</td></tr>
+        <tr><td>Обязательная проверка <strong>«причина или симптом»</strong>: идём вверх по цепочке, пока аномалия не перестанет объясняться</td><td>Не путаем следствие с виновником (клапан-то «виноват» был на графике!)</td></tr>
+        <tr><td>У каждого вывода — <strong>confidence</strong> (высокий/средний/низкий) и что бы его подняло</td><td>Решение остановить линию принимает человек, видя цену ошибки</td></tr>
+        <tr><td>След <strong>запечатывается SHA-256</strong>, из него собирается отчёт одной командой</td><td>Разбор для начальника/аудитора — минуты, а не «расспросы агента»</td></tr>
+      </table>
+    </div>
+
+    <h3>Чек-лист аудируемого расследования</h3>
+    <div class="card card-accent">
+      <ul class="checklist">
+        <li>Гипотеза сформулирована <em>до</em> запроса к данным — и записана</li>
+        <li>Каждый запрос логируется сам (не «по памяти агента»)</li>
+        <li>Опровергнутые версии помечены с шагами-доказательствами</li>
+        <li>Для главной аномалии проверен вопрос «причина или симптом»</li>
+        <li>Вывод несёт уверенность и список «что бы подтвердило сильнее»</li>
+        <li>Рекомендации ссылаются на документ (название + редакция)</li>
+        <li>След запечатан хэшем, отчёт сгенерирован</li>
+      </ul>
+    </div>
+
+    <h3>Что важно: след — не промпт</h3>
+    <p>Все эти правила живут не «в настроении модели», а <strong>в механике</strong>: скрипт перехватывает вызовы, скрипт принимает записи рассуждений, скрипт печатает отчёт. Модель может быть любой — ядерная часть не зависит от нейросети. Это тот же принцип, что и в вашей папке проекта (урок 1.2): <strong>ритуал записан вне головы исполнителя</strong>.</p>
+    <p>Сам кейс — учебный, на демо-данных котла. Но паттерн переносится на любое расследование агентом: падение выручки, сбой поставки, инцидент на складе. Порт этого проекта на открытую модель занял у автора курса один вечер — именно потому, что след отделён от модели.</p>
+  </div>
+
+  <!-- КВИЗ -->
+  <div class="section">
+    <h2>✅ Проверь себя</h2>
+
+    <div class="card card-accent">
+      <p><strong>1. Агент уверенно пишет: «Причина падения температуры — неисправность клапана поливки». На графике клапан действительно открыт. Чего не хватает для доверия?</strong></p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Ничего — график это доказывает</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Проверки «причина или симптом»: клапан мог открыться <em>в ответ</em> на падение — надо идти вверх по цепочке</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Ещё трёх графиков этого же клапана за другие дни</div>
+      <div class="result"></div>
+    </div>
+
+    <div class="card card-accent">
+      <p><strong>2. Зачем след расследования запечатывать хэшем (SHA-256)?</strong></p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Чтобы сжать файл следа для архива</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Чтобы было доказуемо, что запись не подправили задним числом</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Чтобы агент не мог прочитать свой же след</div>
+      <div class="result"></div>
+    </div>
+
+    <div class="card card-accent">
+      <p><strong>3. Агент нашёл аномалию на датчике X. По протоколу следующий шаг:</strong></p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Сообщить результат — аномалия найдена</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">B) Запросить замену датчика X</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">C) Идти вверх по цепочке: не управляет ли X контур регулирования, не врёт ли сам датчик, не объясняется ли X чем-то ещё выше по потоку</div>
+      <div class="result"></div>
+    </div>
+  </div>
+
+  <!-- ИТОГИ -->
+  <div class="section">
+    <h2>🔑 Ключевые выводы</h2>
+    <div class="card card-success">
+      <ul>
+        <li><strong>Ответ без следа — это мнение.</strong> Аудируемость = автоматический лог вызовов + записанные гипотезы/опровержения + уверенность с выводами.</li>
+        <li><strong>Обязательное опровержение</strong> первой красивой версии — самая ценная привычка агента-расследователя.</li>
+        <li><strong>Причина ≠ симптом:</strong> всегда проверяем, не реагирует ли найденный «виновник» на что-то выше по потоку.</li>
+        <li>Механика следа живёт <strong>в скриптах, а не в промпте</strong> — модель можно менять, след останется.</li>
+        <li>Паттерн универсален: котёл, продажи, логистика — любое расследование с данными.</li>
+      </ul>
+      <p style="color: var(--muted); font-size: 0.9rem; margin-top: 14px;">Первоисточник кейса: github.com/ScottDuncanAI/industrial-ai-troubleshooting-agent (Apache-2.0).</p>
+    </div>
+  </div>
+
+  <div class="nav-footer">
+    <a href="../03-incident-log/index.html" class="nav-btn">← Предыдущий урок</a>
+    <a href="../../catalog.html" class="nav-btn primary">К каталогу уроков →</a>
+  </div>
+
+</article>
+
+<footer>
+  <p>ИИ-агенты на практике · Уровень 3 · Урок 3.5</p>
+</footer>
+
+<script>
+function checkAnswer(el, isCorrect) {
+  const card = el.closest('.card');
+  const options = card.querySelectorAll('.quiz-option');
+  const resultDiv = card.querySelector('.result');
+  options.forEach(o => o.classList.add('disabled'));
+  if (isCorrect) {
+    el.classList.add('correct');
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(16,185,129,0.1)';
+    resultDiv.style.border = '1px solid var(--success)';
+    resultDiv.innerHTML = '<strong>✅ Правильно!</strong>';
+  } else {
+    el.classList.add('wrong');
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(245,158,11,0.1)';
+    resultDiv.style.border = '1px solid var(--warning)';
+    resultDiv.innerHTML = '<strong>⚠️ Не совсем. Попробуйте другой вариант.</strong>';
+    setTimeout(() => {
+      options.forEach(o => o.classList.remove('disabled'));
+      el.classList.remove('wrong');
+      resultDiv.classList.remove('show');
+    }, 2500);
+  }
+}
+</script>
+
+</body>
+</html>
