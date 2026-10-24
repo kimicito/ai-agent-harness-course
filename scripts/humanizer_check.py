@@ -70,7 +70,7 @@ PATTERNS = {
         (r'\bВажно отметить, что\b', "Важно отметить — filler"),
         (r'\bДля того чтобы\b', "Для того чтобы — filler"),
         (r'\bКонечно!?\b', "Конечно — servile tone"),
-        (r'\bОтличный вопрос!\b', "Отличный вопрос — servile tone"),
+        (r'\bОтличный вопрос\b!?', "Отличный вопрос — servile tone"),
         (r'\bНадеюсь, это поможет\b', "Надеюсь — chatbot artifact"),
         (r'\bВот обзор\b', "Вот обзор — chatbot artifact"),
         (r'\bКритически важный\b', "Критически важный — AI vocab"),
@@ -105,6 +105,53 @@ PATTERNS = {
     ]
 }
 
+# Скоринг (адаптация stop-slop, MIT): 5 измерений × 10 баллов, порог 35/50.
+# Категории паттернов → измерения. Density считается по всем находкам.
+DIMENSION_MAP = {
+    "filler": "directness",
+    "copula avoidance": "directness",
+    "servile tone": "trust",
+    "chatbot artifact": "trust",
+    "ai vocabulary": "authenticity",
+    "ai vocab": "authenticity",
+    "promotional": "authenticity",
+    "inflated symbolism": "authenticity",
+    "superficial": "authenticity",
+    "parallelism": "rhythm",
+}
+DIMENSION_ORDER = ["directness", "rhythm", "trust", "authenticity", "density"]
+DIMENSION_NAMES = {
+    "directness": "Прямота (Directness)",
+    "rhythm": "Ритм (Rhythm)",
+    "trust": "Доверие (Trust)",
+    "authenticity": "Аутентичность (Authenticity)",
+    "density": "Плотность (Density)",
+}
+SCORE_THRESHOLD = 35  # из 50; ниже — ревизия текста
+
+def word_count(path):
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            return len(re.findall(r'\w+', f.read()))
+    except Exception:
+        return 0
+
+def score(all_issues, words_total):
+    """Возвращает (scores, counts). Шкала 1-10 на измерение, порог 35/50."""
+    counts = {d: 0 for d in DIMENSION_ORDER}
+    for _, _, desc in all_issues:
+        head = desc.split("\n")[0]  # label без контекстной строки
+        cat = head.split("—")[-1].strip().lower() if "—" in head else "misc"
+        dim = DIMENSION_MAP.get(cat)
+        if dim:
+            counts[dim] += 1
+    k = max(1.0, words_total / 1000.0)  # нормировка на 1000 слов
+    scores = {}
+    for dim in ["directness", "rhythm", "trust", "authenticity"]:
+        scores[dim] = max(1, 10 - round((counts[dim] / k) * 2))
+    scores["density"] = max(1, 10 - round((len(all_issues) / k) * 0.5))
+    return scores, counts
+
 def scan_file(path, patterns):
     """Сканирует один файл на наличие AI-паттернов."""
     issues = []
@@ -127,6 +174,8 @@ def main():
     parser.add_argument('lang', nargs='?', default='fr', choices=['en', 'fr', 'es', 'zh', 'ru'],
                         help='Language to check (default: fr)')
     parser.add_argument('--dir', default=None, help='Directory to scan (default: site/LANG/)')
+    parser.add_argument('--score', action='store_true',
+                        help='Скоринговая шкала 35/50 (stop-slop adaptation) вместо бинарного вердикта')
     args = parser.parse_args()
     
     # Определяем директорию
@@ -149,6 +198,23 @@ def main():
         all_issues.extend(issues)
     
     # Выводим результаты
+    if args.score:
+        words_total = sum(word_count(fp) for fp in files)
+        scores, counts = score(all_issues, words_total)
+        total = sum(scores.values())
+        print(f"\n📊 Scorecard ({words_total} words scanned):")
+        for dim in DIMENSION_ORDER:
+            bar = "█" * scores[dim] + "░" * (10 - scores[dim])
+            print(f"  {DIMENSION_NAMES[dim]:<32} {bar} {scores[dim]}/10  ({counts[dim]} hits)")
+        verdict = "✅ PASSED" if total >= SCORE_THRESHOLD else "❌ FAILED"
+        print(f"\n  ИТОГО: {total}/50 (порог {SCORE_THRESHOLD}) — {verdict}")
+        if all_issues:
+            print(f"\n⚠️  Находки: {len(all_issues)} AI pattern(s):")
+            for filepath, line, desc in all_issues:
+                print(f"  📁 {filepath}:{line}")
+                print(f"     {desc}\n")
+        sys.exit(0 if total >= SCORE_THRESHOLD else 1)
+
     if all_issues:
         print(f"\n⚠️  Found {len(all_issues)} AI pattern(s):\n")
         for filepath, line, desc in all_issues:
