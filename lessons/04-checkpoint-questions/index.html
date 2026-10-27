@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>4.2 · Контрольные вопросы вместо микроменеджмента — ИИ-агенты на практике</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+  :root { --bg: #0B0F19; --card: #111827; --text: #F3F4F6; --muted: #9CA3AF; --accent: #8B5CF6; --accent2: #06B6D4; --border: rgba(255,255,255,0.08); --success: #10B981; --warning: #F59E0B; --danger: #EF4444; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; margin: 0; overflow-x: hidden; }
+  .container { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+  header { padding: 16px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  .lesson-header { padding: 32px 0 16px; }
+  .lesson-header .phase { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+  .lesson-header h1 { margin: 8px 0; font-size: 1.8rem; line-height: 1.25; }
+  .lesson-header .meta { color: var(--muted); font-size: 0.9rem; }
+  .section { margin: 28px 0; }
+  .section h2 { color: var(--accent); font-size: 1.2rem; margin-bottom: 12px; }
+  .section h3 { color: var(--accent2); font-size: 1.05rem; margin: 20px 0 10px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 14px 0; }
+  .card-accent { border-left: 4px solid var(--accent); }
+  .card-success { border-left: 4px solid var(--success); }
+  .card-warning { border-left: 4px solid var(--warning); }
+  .highlight { background: rgba(139,92,246,0.1); padding: 2px 6px; border-radius: 4px; }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 8px 0; padding-left: 28px; position: relative; }
+  .checklist li:before { content: "☐"; position: absolute; left: 0; color: var(--accent); }
+  .example { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); border-radius: 8px; padding: 14px; margin: 12px 0; }
+  .example-label { color: var(--accent2); font-size: 0.75rem; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .nav-footer { display: flex; justify-content: space-between; padding: 32px 0; border-top: 1px solid var(--border); margin-top: 32px; flex-wrap: wrap; gap: 8px; }
+  .nav-btn { padding: 10px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); text-decoration: none; transition: all 0.2s; }
+  .nav-btn:hover { border-color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); border-color: var(--accent); }
+  footer { padding: 32px 16px; text-align: center; color: var(--muted); border-top: 1px solid var(--border); }
+  .card + .card { margin-top: 40px; }
+  .quiz-option + .quiz-option { margin-top: 8px; }
+  .card-accent:has(.quiz-option) { border-left: none; border-top: 3px solid var(--accent); }
+  .quiz-option { display: block; word-wrap: break-word; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; cursor: pointer; transition: all 0.2s; }
+  .quiz-option:hover { border-color: var(--accent); }
+  .quiz-option.correct { border-color: var(--success); background: rgba(16,185,129,0.1); }
+  .quiz-option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.1); }
+  .quiz-option.disabled { opacity: 0.5; pointer-events: none; }
+  .result { display: none; padding: 16px; border-radius: 8px; margin: 16px 0; }
+  .result.show { display: block; }
+  pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; }
+  ul, ol { padding-left: 20px; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.9rem; }
+  th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--accent); font-weight: 600; }
+  .compare-box { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  .compare-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  @media (max-width: 768px) {
+    .lesson-header h1 { font-size: 1.4rem; }
+    .compare-box { grid-template-columns: 1fr; }
+    .nav-footer { flex-direction: column; }
+    .nav-btn { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <a href="../../index.html" class="logo">🧠 ИИ-агенты на практике</a>
+    <a href="../../catalog.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">← Каталог</a> <span style="color: var(--border); margin: 0 8px;">|</span> <a href="../../glossary.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">📖 Термины</a>
+  </div>
+</header>
+
+<article class="container">
+
+  <div class="lesson-header">
+    <div class="phase">🪄 УРОВЕНЬ 4 · ДИРИЖЁР АГЕНТОВ: ОРКЕСТРАЦИЯ БЕЗ КОДА</div>
+    <h1>4.2 · Контрольные вопросы вместо микроменеджмента</h1>
+    <div class="meta">🎯 Без кода · ✅ Интерактивный квиз · ⏱️ ~12 минут</div>
+  </div>
+
+  <!-- ЗАЧЕМ -->
+  <div class="section">
+    <h2>🎯 Зачем это бизнесу</h2>
+    <p>Роли распределены (урок 4.1), но дирижёру нужно управлять процессом. Два крайних пути: стоять над агентом с каждым шагом (микроменеджмент — вы стали бутылочным горлышком) или бросить его на произвол (вспомните уровень 0). Есть третий путь — <strong>контрольные вопросы</strong>: точки, где агент обязан остановиться и ответить, прежде чем идти дальше.</p>
+  </div>
+
+  <!-- ЧТО ИЗУЧАЕМ -->
+  <div class="section">
+    <h2>📚 Что изучаем</h2>
+
+    <h3>Как устроена контрольная точка-вопрос</h3>
+    <div class="card card-accent">
+      <pre>План: «Перед [действие X] агент отвечает на три вопроса:
+1. ЧТО именно я сейчас сделаю? (одна фраза)
+2. ПО ЧЕМУ я это проверю после? (факт, не «посмотрю»)
+3. ЧТО ПОЙДЁТ НЕ ТАК в первую очередь? (один главный риск)
+
+Ответы записаны в ПРОГРЕСС.md → вы читаете → «ок» →
+агент идёт дальше.</pre>
+    </div>
+    <p>Это дороже, чем «просто сделай», и намного дешевле, чем переделывать. Три вопроса занимают у агента минуту, а вам — полминуты на чтение. Зато вы узнаёте о проблеме <em>до</em> того, как она станет файлом, письмом или цифрой в отчёте.</p>
+
+    <h3>Вопрос через отрицание: главный приём</h3>
+    <p>Прямой вопрос «всё ли хорошо?» запускает у агента поиск подтверждений — помните эффект адвоката. Обратный вопрос — «что могло сломаться?» — запускает поиск проблем. Один и тот же результат, два вопроса:</p>
+    <div class="compare-box">
+      <div class="compare-item">
+        <h4 style="color: var(--danger); margin: 0 0 10px;">✗ «Проверь, всё ли верно»</h4>
+        <p style="font-size: 0.9rem; color: var(--muted);">Агент подтверждает сам себя: «Все цифры соответствуют исходным данным». Вы узнали, что агент доволен собой.</p>
+      </div>
+      <div class="compare-item">
+        <h4 style="color: var(--success); margin: 0 0 10px;">✓ «Назови три места, где ты мог ошибиться»</h4>
+        <p style="font-size: 0.9rem; color: var(--muted);">Агент ищет слабости: «Курс валют брал по вчерашней дате; у позиции 7 две цены — не ясно, какая с НДС». Вы узнали, где сверять в первую очередь.</p>
+      </div>
+    </div>
+
+    <h3>Доказательство вместо пересказа</h3>
+    <div class="card card-warning">
+      <p>Пересказ результата и результат — разные вещи (урок 0.1). Требуйте доказательство: не «таблица готова», а «таблица из 12 строк, строка 7 сверена с КП №3 — вот цитата». Число, цитата, ссылка на источник — в каждой контрольной точке. Это делает ответ проверяемым вами за секунды, без чтения всей работы.</p>
+    </div>
+
+    <h3>Где ставить точки: три места</h3>
+    <div class="card">
+      <table>
+        <tr><th>Точка</th><th>Вопрос</th><th>Когда обязательна</th></tr>
+        <tr><td><strong>Перед необратимым действием</strong></td><td>«Что сейчас произойдёт и как откатить?»</td><td>Всегда (инварианты из урока 2.3 — про то же)</td></tr>
+        <tr><td><strong>На полпути длинной задачи</strong></td><td>«Что сделано, что осталось, что изменилось в плане?»</td><td>Задачи длиннее одной сессии</td></tr>
+        <tr><td><strong>Перед передачей дальше</strong></td><td>«Где именно выполнено постусловие?»</td><td>Передача проверяющему или вам на приёмку</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- КАК ПРИМЕНИТЬ -->
+  <div class="section">
+    <h2>🛠️ Как применить</h2>
+    <div class="card card-success">
+      <h4>🧑‍💼 Руководитель</h4>
+      <p>Вместо ежедневных «ну что там?» — асинхронные контрольные точки: агент пишет ответы на три вопроса в ПРОГРЕСС.md, вы читаете дважды в день. Статус виден, вопросы закрыты, совещания не нужны.</p>
+    </div>
+    <div class="card card-success">
+      <h4>⚖️ Юрист</h4>
+      <p>Перед отправкой замечаний контрагенту: «Три места, где я мог неверно истолковать условия?» Агент называет пункты со спорной формулировкой — вы их перечитываете сами. Один такой прогон спас от спора о трактовке.</p>
+    </div>
+    <div class="card card-success">
+      <h4>📊 Финансист</h4>
+      <p>Отчёт для совета директоров: контрольная точка с обязательным вопросом «где цифры могли разойтись с первичкой?» — и требованием приложить сверку по этим местам. Совет задаёт тот же вопрос; лучше, чтобы вы задали его раньше.</p>
+    </div>
+  </div>
+
+  <!-- ЧЕКЛИСТ -->
+  <div class="section">
+    <h2>✅ Чеклист принятия результата</h2>
+    <ul class="checklist">
+      <li>У длинных задач есть 1–3 контрольные точки-вопроса, записанные в план</li>
+      <li>В каждой точке — ответы на три вопроса: что / по чему проверю / что пойдёт не так</li>
+      <li>Проверяющие вопросы я формулирую через отрицание («что могло сломаться»)</li>
+      <li>На каждый пункт контрольной точки — доказательство: число, цитата, источник</li>
+    </ul>
+  </div>
+
+  <!-- КВИЗ -->
+  <div class="section">
+    <h2>📝 Проверка понимания</h2>
+    <div class="card card-accent">
+      <p><strong>Вопрос 1:</strong> Почему вопрос «что могло сломаться?» лучше, чем «всё ли хорошо?»?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Он короче</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) «Всё ли хорошо» запускает поиск подтверждений, а «что сломалось» — поиск проблем; второй вопрос честнее</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Первый вопрос агентам запрещён</div>
+      <div class="result" id="result1"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 2:</strong> Что должно быть в контрольной точке вместо пересказа?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Подробное описание всех действий агента</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Доказательство: число, цитата, ссылка на источник по каждому пункту</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Уверенное заявление «всё проверено»</div>
+      <div class="result" id="result2"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 3:</strong> Где контрольная точка обязательна всегда?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Перед каждым запросом к агенту</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Перед необратимым действием: отправкой, публикацией, удалением</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Никогда — это лишняя бюрократия</div>
+      <div class="result" id="result3"></div>
+    </div>
+  </div>
+
+  <!-- ГЛАВНОЕ -->
+  <div class="section">
+    <div class="card card-success">
+      <h3>🎯 Главное из урока</h3>
+      <p><strong>Дирижировать — значит задавать вопросы в правильных точках, а не проверять каждый шаг.</strong> Три вопроса перед рискованным действием, вопросы через отрицание, доказательства вместо пересказов — и вы управляете оркестром, не превращаясь в его часть.</p>
+    </div>
+  </div>
+
+  <div class="nav-footer">
+    <a href="../04-roles/index.html" class="nav-btn">← Предыдущий урок</a>
+    <a href="../04-monthly-cleaning/index.html" class="nav-btn primary">Следующий урок →</a>
+  </div>
+
+</article>
+<footer>
+  <div class="container">
+    <p>© 2026 Artur A. · ИИ-агенты на практике</p>
+  </div>
+</footer>
+
+<script>
+function checkAnswer(element, isCorrect) {
+  const card = element.closest('.card');
+  const options = card.querySelectorAll('.quiz-option');
+  const resultDiv = card.querySelector('.result');
+  if (isCorrect) {
+    options.forEach(opt => {
+      opt.style.pointerEvents = 'none';
+      if (opt === element) opt.classList.add('correct');
+      else opt.classList.add('disabled');
+    });
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(16,185,129,0.1)';
+    resultDiv.style.border = '1px solid var(--success)';
+    resultDiv.innerHTML = '<strong>✅ Правильно!</strong>';
+  } else {
+    element.classList.add('wrong');
+    element.style.pointerEvents = 'none';
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(245,158,11,0.1)';
+    resultDiv.style.border = '1px solid var(--warning)';
+    resultDiv.innerHTML = '<strong>⚠️ Не совсем. Попробуйте другой вариант.</strong>';
+  }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>0.3 · Чек-лист приёмки — ИИ-агенты на практике</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+  :root { --bg: #0B0F19; --card: #111827; --text: #F3F4F6; --muted: #9CA3AF; --accent: #8B5CF6; --accent2: #06B6D4; --border: rgba(255,255,255,0.08); --success: #10B981; --warning: #F59E0B; --danger: #EF4444; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; margin: 0; overflow-x: hidden; }
+  .container { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+  header { padding: 16px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  .lesson-header { padding: 32px 0 16px; }
+  .lesson-header .phase { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+  .lesson-header h1 { margin: 8px 0; font-size: 1.8rem; line-height: 1.25; }
+  .lesson-header .meta { color: var(--muted); font-size: 0.9rem; }
+  .section { margin: 28px 0; }
+  .section h2 { color: var(--accent); font-size: 1.2rem; margin-bottom: 12px; }
+  .section h3 { color: var(--accent2); font-size: 1.05rem; margin: 20px 0 10px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 14px 0; }
+  .card-accent { border-left: 4px solid var(--accent); }
+  .card-success { border-left: 4px solid var(--success); }
+  .card-warning { border-left: 4px solid var(--warning); }
+  .highlight { background: rgba(139,92,246,0.1); padding: 2px 6px; border-radius: 4px; }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 8px 0; padding-left: 28px; position: relative; }
+  .checklist li:before { content: "☐"; position: absolute; left: 0; color: var(--accent); }
+  .example { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); border-radius: 8px; padding: 14px; margin: 12px 0; }
+  .example-label { color: var(--accent2); font-size: 0.75rem; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .nav-footer { display: flex; justify-content: space-between; padding: 32px 0; border-top: 1px solid var(--border); margin-top: 32px; flex-wrap: wrap; gap: 8px; }
+  .nav-btn { padding: 10px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); text-decoration: none; transition: all 0.2s; }
+  .nav-btn:hover { border-color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); border-color: var(--accent); }
+  footer { padding: 32px 16px; text-align: center; color: var(--muted); border-top: 1px solid var(--border); }
+  .card + .card { margin-top: 40px; }
+  .quiz-option + .quiz-option { margin-top: 8px; }
+  .card-accent:has(.quiz-option) { border-left: none; border-top: 3px solid var(--accent); }
+  .quiz-option { display: block; word-wrap: break-word; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; cursor: pointer; transition: all 0.2s; }
+  .quiz-option:hover { border-color: var(--accent); }
+  .quiz-option.correct { border-color: var(--success); background: rgba(16,185,129,0.1); }
+  .quiz-option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.1); }
+  .quiz-option.disabled { opacity: 0.5; pointer-events: none; }
+  .result { display: none; padding: 16px; border-radius: 8px; margin: 16px 0; }
+  .result.show { display: block; }
+  pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; }
+  ul, ol { padding-left: 20px; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.9rem; }
+  th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--accent); font-weight: 600; }
+  .compare-box { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  .compare-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  @media (max-width: 768px) {
+    .lesson-header h1 { font-size: 1.4rem; }
+    .compare-box { grid-template-columns: 1fr; }
+    .nav-footer { flex-direction: column; }
+    .nav-btn { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <a href="../../index.html" class="logo">🧠 ИИ-агенты на практике</a>
+    <a href="../../catalog.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">← Каталог</a> <span style="color: var(--border); margin: 0 8px;">|</span> <a href="../../glossary.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">📖 Термины</a>
+  </div>
+</header>
+
+<article class="container">
+
+  <div class="lesson-header">
+    <div class="phase">🎯 УРОВЕНЬ 0 · «СКАЗАЛ ГОТОВО» ≠ «СДЕЛАНО»</div>
+    <h1>0.3 · Чек-лист приёмки: как выглядит «сделано»</h1>
+    <div class="meta">🎯 Без кода · ✅ Интерактивный квиз · ⏱️ ~12 минут</div>
+  </div>
+
+  <!-- ЗАЧЕМ -->
+  <div class="section">
+    <h2>🎯 Зачем это бизнесу</h2>
+    <p>«Проверяйте результаты ИИ» — пустой совет, если непонятно, <em>что</em> проверять. Проверка «ну вроде нормально выглядит» не ловит ошибки в цифрах. Нужен <strong>чек-лист приёмки</strong>: короткий список проверяемых фактов по каждому типу задач.</p>
+    <p>Хорошая новость: один раз составив такой чек-лист, вы будете проверять результат за 2 минуты — вместо десяти минут тревожного чтения.</p>
+  </div>
+
+  <!-- ЧТО ИЗУЧАЕМ -->
+  <div class="section">
+    <h2>📚 Что изучаем</h2>
+
+    <h3>Шаг 1. Определите признаки готовности до старта</h3>
+    <p>Самая частая ошибка — решать, что значит «готово», <em>после</em> того, как ИИ отдал результат. Тогда проверка превращается в оправдание ИИ. Отвечайте на вопрос <strong>«как я пойму, что задача сделана?» до того, как дать задачу</strong> — и запишите ответ.</p>
+    <div class="compare-box">
+      <div class="compare-item">
+        <h4 style="color: var(--danger); margin: 0 0 10px;">✗ Плохое определение</h4>
+        <p style="font-size: 0.9rem; color: var(--muted);">«Отчёт написан»<br>«Таблица есть»<br>«Договор проверен»</p>
+      </div>
+      <div class="compare-item">
+        <h4 style="color: var(--success); margin: 0 0 10px;">✓ Хорошее определение</h4>
+        <p style="font-size: 0.9rem; color: var(--muted);">«Таблица содержит все 12 КП, у каждой цифры есть источник»<br>«Каждый найденный риск указан с номером пункта договора»</p>
+      </div>
+    </div>
+
+    <h3>Шаг 2. Три уровня проверки</h3>
+    <div class="card">
+      <table>
+        <tr><th>Уровень</th><th>Что проверяет</th><th>Сколько времени</th><th>Пример</th></tr>
+        <tr><td><strong>1. Формальный</strong></td><td>Результат существует и открывается</td><td>30 секунд</td><td>Файл открывается, таблица не пустая, язык русский</td></tr>
+        <tr><td><strong>2. Выборочный</strong></td><td>Ключевые факты и цифры</td><td>2 минуты</td><td>3 случайные цифры сверены с исходными документами</td></tr>
+        <tr><td><strong>3. Сквозной</strong></td><td>Результат работает на реальном примере целиком</td><td>5–10 минут</td><td>Взять один реальный кейс и пройти его по готовому отчёту от начала до конца</td></tr>
+      </table>
+      <p>Правило: на мелких задачах — уровень 2, на важных — уровень 3. Уровень 1 сам по себе ничего не гарантирует: красивый пустой файл проходит формальную проверку.</p>
+    </div>
+
+    <h3>Шаг 3. Постусловие: формула готовности</h3>
+    <p>Запишите результат в формате <strong>«сделано = проверяемый факт»</strong>. Это и есть постусловие задачи. Примеры:</p>
+    <div class="card card-success">
+      <ul>
+        <li>Сравнение цен готово = таблица на 12 позиций, у каждой цены указан источник, итог совпал с ручной проверкой одной случайной строки</li>
+        <li>Проверка договора готова = список отклонений, у каждого — номер пункта и цитата из договора</li>
+        <li>Резюме встречи готово = есть решения, сроки и ответственные, участники подтвердили список участников</li>
+      </ul>
+    </div>
+    <p>Для повторяющихся задач (отчёты, КП, договоры) постусловие оформляется одним раз как <strong>шаблон</strong> — и используется каждый раз, не думая.</p>
+  </div>
+
+  <!-- КАК ПРИМЕНИТЬ -->
+  <div class="section">
+    <h2>🛠️ Как применить</h2>
+    <div class="card card-accent">
+      <h3>Шаблон чек-листа приёмки</h3>
+      <pre>Задача: ______________________
+
+Готово, когда:
+1. ______________________
+2. ______________________
+3. ______________________
+
+Проверяю (2–3 пункта):
+- [ ] факт 1
+- [ ] факт 2
+Источник для сверки: ______________________</pre>
+    </div>
+    <div class="card card-success">
+      <h4>🛒 Закупщик — приёмка сравнения цен</h4>
+      <p>Готово, когда: (1) в таблице все КП из входящих писем; (2) у каждой цены есть источник; (3) валюта и НДС приведены единообразно. Проверяю: итог по одной случайной позиции считаю сам.</p>
+    </div>
+    <div class="card card-success">
+      <h4>⚖️ Юрист — приёмка проверки договора</h4>
+      <p>Готово, когда: (1) каждое замечание — с номером пункта и цитатой; (2) замечаний нет «вообще» — таких договоров не бывает, это признак недопроверки. Проверяю: два случайных пункта открываю в оригинале.</p>
+    </div>
+  </div>
+
+  <!-- ЧЕКЛИСТ -->
+  <div class="section">
+    <h2>✅ Чеклист принятия результата</h2>
+    <ul class="checklist">
+      <li>Перед постановкой задачи ИИ я записываю, как пойму, что она сделана</li>
+      <li>У моих типовых задач есть шаблоны чек-листов приёмки</li>
+      <li>Важные задачи проверяю сквозным прогоном на реальном примере</li>
+      <li>Мои постусловия — про проверяемые факты, а не про «выглядит хорошо»</li>
+    </ul>
+  </div>
+
+  <!-- КВИЗ -->
+  <div class="section">
+    <h2>📝 Проверка понимания</h2>
+    <div class="card card-accent">
+      <p><strong>Вопрос 1:</strong> Когда нужно определять, как выглядит «сделано»?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) После того, как ИИ отдал результат</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) До того, как дать ИИ задачу</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Не важно — и так понятно</div>
+      <div class="result" id="result1"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 2:</strong> Что гарантирует формальная проверка (файл открывается, таблица не пустая)?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Что результат верен</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Только что результат существует — для важных задач нужны уровни 2–3</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Что ИИ не ошибался</div>
+      <div class="result" id="result2"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 3:</strong> Какое постусловие лучше?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) «Отчёт готов, когда ИИ его закончил»</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">B) «Отчёт готов, когда он выглядит полным»</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">C) «Отчёт готов, когда все цифры сверены с исходными файлами, а выводы не противоречат данным»</div>
+      <div class="result" id="result3"></div>
+    </div>
+  </div>
+
+  <!-- ГЛАВНОЕ -->
+  <div class="section">
+    <div class="card card-success">
+      <h3>🎯 Главное из урока</h3>
+      <p><strong>«Готово» определяется до старта, а не после.</strong> Постусловие — это формула из проверяемых фактов: «сделано = все цифры сошлись с источниками». Мелочь проверяем выборочно, важное — сквозным прогоном. Чек-лист один раз составляем, потом тратим 2 минуты.</p>
+    </div>
+  </div>
+
+  <div class="nav-footer">
+    <a href="../00-confidence-trap/index.html" class="nav-btn">← Предыдущий урок</a>
+    <a href="../00-second-auditor/index.html" class="nav-btn primary">Следующий урок →</a>
+  </div>
+
+</article>
+<footer>
+  <div class="container">
+    <p>© 2026 Artur A. · ИИ-агенты на практике</p>
+  </div>
+</footer>
+
+<script>
+function checkAnswer(element, isCorrect) {
+  const card = element.closest('.card');
+  const options = card.querySelectorAll('.quiz-option');
+  const resultDiv = card.querySelector('.result');
+  if (isCorrect) {
+    options.forEach(opt => {
+      opt.style.pointerEvents = 'none';
+      if (opt === element) opt.classList.add('correct');
+      else opt.classList.add('disabled');
+    });
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(16,185,129,0.1)';
+    resultDiv.style.border = '1px solid var(--success)';
+    resultDiv.innerHTML = '<strong>✅ Правильно!</strong>';
+  } else {
+    element.classList.add('wrong');
+    element.style.pointerEvents = 'none';
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(245,158,11,0.1)';
+    resultDiv.style.border = '1px solid var(--warning)';
+    resultDiv.innerHTML = '<strong>⚠️ Не совсем. Попробуйте другой вариант.</strong>';
+  }
+}
+</script>
+
+</body>
+</html>

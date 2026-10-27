@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>5.5 · /learn: агент учится на поправках — ИИ-агенты на практике</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+  :root { --bg: #0B0F19; --card: #111827; --text: #F3F4F6; --muted: #9CA3AF; --accent: #8B5CF6; --accent2: #06B6D4; --border: rgba(255,255,255,0.08); --success: #10B981; --warning: #F59E0B; --danger: #EF4444; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; margin: 0; overflow-x: hidden; }
+  .container { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+  header { padding: 16px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  .lesson-header { padding: 32px 0 16px; }
+  .lesson-header .phase { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+  .lesson-header h1 { margin: 8px 0; font-size: 1.8rem; line-height: 1.25; }
+  .lesson-header .meta { color: var(--muted); font-size: 0.9rem; }
+  .section { margin: 28px 0; }
+  .section h2 { color: var(--accent); font-size: 1.2rem; margin-bottom: 12px; }
+  .section h3 { color: var(--accent2); font-size: 1.05rem; margin: 20px 0 10px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 14px 0; }
+  .card-accent { border-left: 4px solid var(--accent); }
+  .card-success { border-left: 4px solid var(--success); }
+  .card-warning { border-left: 4px solid var(--warning); }
+  .highlight { background: rgba(139,92,246,0.1); padding: 2px 6px; border-radius: 4px; }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 8px 0; padding-left: 28px; position: relative; }
+  .checklist li:before { content: "☐"; position: absolute; left: 0; color: var(--accent); }
+  .example { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); border-radius: 8px; padding: 14px; margin: 12px 0; }
+  .example-label { color: var(--accent2); font-size: 0.75rem; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .nav-footer { display: flex; justify-content: space-between; padding: 32px 0; border-top: 1px solid var(--border); margin-top: 32px; flex-wrap: wrap; gap: 8px; }
+  .nav-btn { padding: 10px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); text-decoration: none; transition: all 0.2s; }
+  .nav-btn:hover { border-color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); border-color: var(--accent); }
+  footer { padding: 32px 16px; text-align: center; color: var(--muted); border-top: 1px solid var(--border); }
+  .card + .card { margin-top: 40px; }
+  .quiz-option + .quiz-option { margin-top: 8px; }
+  .card-accent:has(.quiz-option) { border-left: none; border-top: 3px solid var(--accent); }
+  .quiz-option { display: block; word-wrap: break-word; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; cursor: pointer; transition: all 0.2s; }
+  .quiz-option:hover { border-color: var(--accent); }
+  .quiz-option.correct { border-color: var(--success); background: rgba(16,185,129,0.1); }
+  .quiz-option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.1); }
+  .quiz-option.disabled { opacity: 0.5; pointer-events: none; }
+  .result { display: none; padding: 16px; border-radius: 8px; margin: 16px 0; }
+  .result.show { display: block; }
+  pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; }
+  ul, ol { padding-left: 20px; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.9rem; }
+  th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--accent); font-weight: 600; }
+  .compare-box { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  .compare-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  @media (max-width: 768px) {
+    .lesson-header h1 { font-size: 1.4rem; }
+    .compare-box { grid-template-columns: 1fr; }
+    .nav-footer { flex-direction: column; }
+    .nav-btn { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <a href="../../index.html" class="logo">🧠 ИИ-агенты на практике</a>
+    <a href="../../catalog.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">← Каталог</a> <span style="color: var(--border); margin: 0 8px;">|</span> <a href="../../glossary.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">📖 Термины</a>
+  </div>
+</header>
+
+<article class="container">
+
+  <div class="lesson-header">
+    <div class="phase">🛠 УРОВЕНЬ 5 · ИНЖЕНЕР ХАРНЕССА: АГЕНТ БЕЗ НАДЗОРА</div>
+    <h1>5.5 · /learn: агент учится на поправках</h1>
+    <div class="meta">🎯 С кодом (Python) · ✅ Интерактивный квиз · ⏱️ ~15 минут</div>
+  </div>
+
+  <!-- ЗАЧЕМ -->
+  <div class="section">
+    <h2>🎯 Зачем это бизнесу</h2>
+    <p>Самая дорогая строка в переписке с агентом: «Я уже тебе говорил об этом вчера». Каждая ваша поправка — это урок, который система <em>должна</em> усвоить навсегда, а не до конца сессии. Иначе вы платите за один и тот же урок дважды, десять раз, каждый день.</p>
+    <p>Но просто «добавить в память» недостаточно: записанное в свободной форме агент игнорирует. Нужен <strong>ритуал обучения</strong>: как урок превращается в правило, кто его утверждает и как проверяется, что урок не сломал остальное.</p>
+  </div>
+
+  <!-- ЧТО ИЗУЧАЕМ -->
+  <div class="section">
+    <h2>📚 Что изучаем</h2>
+
+    <h3>Команда /learn: триггер — успех, а не правка</h3>
+    <p>Команда запускается <strong>после завершённой задачи</strong>: агент читает журнал траектории (урок 5.1, п.4 — он у нас есть) и дистиллирует его в файл-скилл: «цель → шаги → ключевые решения → проверенный результат». Важно: в скилл попадает <span class="highlight">процедура, а не данные</span>. Никаких цифр из документов, имён и содержимого файлов — только то, как задача решалась. Данные и секреты в обучающем материале — это утечка, упакованная в «опыт».</p>
+
+    <h3>Поправки — золото</h3>
+    <div class="card card-accent">
+      <p>Если один и тот же урок человек вносит руками <strong>дважды</strong> — система работает неправильно: то, что пришлось учить вручную, должно стать явным ограничением.</p>
+      <p style="margin-bottom:0;">Поэтому журнал траектории отдельно собирает <em>corrections</em> — каждое вмешательство человека: «не так», «пропустил», «в другом порядке». Поправка — это правило, которое пришлось учить руками. Дистиллятор их выделяет и кодирует в скилле как жёсткие ограничения — с причиной, а не просто «делай так».</p>
+    </div>
+    <div class="example">
+      <div class="example-label">Пример · закупки</div>
+      <p>Вы второй раз поправляете: «у поставщика X цены в юанях, смотри валюту перед сравнением». Это не заметка — это ограничение: «Для позиций поставщика X: сначала определи валюту, приведи к рублю по курсу на дату, потом сравнивай». В следующий раз агент применяет сам.</p>
+    </div>
+
+    <h3>Гейт: человек утверждает скилл</h3>
+    <p>Новый скилл попадает не в доверенную папку, а в <span class="highlight">staging</span> — зону ожидания. Из staging в доверенные его переносит человек, прочитав как пул-реквест. Почему это важно: агентский скилл — это исполняемое поведение, а не текст. Скилл с ошибкой заставит агента систематически делать не то на каждой задаче. Ревью скилла — такая же обязательная практика, как ревью кода коллеги. Автообучение без гейта — это как ставить непроверенный код в прод за ночь.</p>
+
+    <h3>Промпт-критик: правка системного промпта — только через эвалы</h3>
+    <p>Третий контур обучения — рефлексия над самим собой. Критик по расписанию читает логи: кластеризует причины падений («модель вызывает не тот инструмент», «съезжает формат», «теряет контекст на длинном файле») и предлагает правку системного промпта. Но правка <strong>не принимается по красивости формулировки</strong>: она обязана пройти эвал-набор — регрессионный набор проверенных кейсов из урока 5.2. Улучшила метрики → в прод. Улучшила слова → в мусор. Это тот же принцип, что весь курс: верификатор решает, не модель.</p>
+    <div class="card card-warning">
+      <p><strong>Три ловушки обучения.</strong> (1) Дистиллировать данные вместо процедуры — скилл становится утечкой. (2) Автоматически доверять свежему скиллу — гейт обязателен. (3) Принимать правки промпта без эвалов — это слепая оптимизация, формула Гудхарта из урока 3.4 в чистом виде.</p>
+    </div>
+  </div>
+
+  <!-- КАК ПРИМЕНИТЬ -->
+  <div class="section">
+    <h2>🛠️ Как применить</h2>
+    <div class="card card-success">
+      <h4>🛒 Закупки: реестр цен по поставщикам</h4>
+      <p>После успешного цикл-аудита /learn собирает скилл «сравнение цен с учётом валют, НДС и условий оплаты». Поправка про юани поставщика X — первый пункт ограничений. Утвердили — все следующие сравнения идут по нему.</p>
+    </div>
+    <div class="card card-success">
+      <h4>🏒 Спортивная аналитика: разборы матчей</h4>
+      <p>«Фамилия игрока всегда проверять по официальному протоколу, не по субтитрам» — урок, выученный один раз после вашей поправки, спасает каждый следующий разбор от искажений.</p>
+    </div>
+    <div class="card card-success">
+      <h4>🧑‍💼 HR: пакеты документов</h4>
+      <p>Критик заметил: агент систематически теряет последнюю страницу сканов. Правка промпта «проверяй число страниц по оглавлению» проходит эвал-набор из 20 пакетов и уходит в прод — с измеримым приростом, а не с «кажется лучше».</p>
+    </div>
+  </div>
+
+  <!-- ЧЕКЛИСТ -->
+  <div class="section">
+    <h2>✅ Чеклист принятия результата</h2>
+    <ul class="checklist">
+      <li>После успешной задачи есть ритуал дистилляции траектории в скилл</li>
+      <li>В скилл попадает процедура (как решать), а не данные сессии</li>
+      <li>Каждая поправка человека логируется и превращается в явное ограничение с причиной</li>
+      <li>Один и тот же урок никогда не вносится вручную дважды</li>
+      <li>Новые скиллы проходят через staging: в доверенные переносит человек после ревью</li>
+      <li>Правки системного промпта принимаются только через эвал-набор</li>
+    </ul>
+  </div>
+
+  <!-- КВИЗ -->
+  <div class="section">
+    <h2>📝 Проверка понимания</h2>
+    <div class="card card-accent">
+      <p><strong>Вопрос 1:</strong> Почему в скилл нельзя копировать данные из сессии?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Чтобы скилл был короче и быстрее читался</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Скилл — это учебный материал на будущее; цифры, имена и содержимое файлов в нём — утечка, упакованная в опыт. Нужна процедура, а не данные</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Данные занимают много места в контексте</div>
+      <div class="result" id="result1"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 2:</strong> Зачем staging-гейт, если дистилляция и так запускается после успешной задачи?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Чтобы скилл подышал перед использованием</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Скилл — исполняемое поведение: ошибка в нём заставит агента систематически делать не то; ревью человеком обязательно, как ревью кода</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Чтобы у человека было больше работы</div>
+      <div class="result" id="result2"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 3:</strong> Как принимается правка системного промпта от критика?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Если формулировка звучит разумно — сразу в прод</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Только если проходит эвал-набор: метрики решают, а не красота слов</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) По жребию между двумя вариантами промпта</div>
+      <div class="result" id="result3"></div>
+    </div>
+  </div>
+
+  <!-- ГЛАВНОЕ -->
+  <div class="section">
+    <div class="card card-success">
+      <h3>🎯 Главное из урока</h3>
+      <p><strong>Обучение — это ритуал с гейтами, а не «запомнить и надеяться».</strong> Успешная траектория дистиллируется в процедуру без данных; каждая ваша поправка становится явным ограничением с причиной; человек утверждает скилл из staging, как код; а правки самого промпта проходят через эвал-набор. Тогда «я уже говорил об этом» звучит в вашем офисе в последний раз.</p>
+    </div>
+    <div class="card">
+      <p style="color: var(--muted); font-size: 0.85rem;">📚 По мотивам главы 21 книги «Hands-on AI Agents» (Antonio Gulli) — репозиторий <code>agulli/atlas-agents</code>, используется с разрешения автора; код и примеры адаптированы.</p>
+    </div>
+  </div>
+
+  <div class="nav-footer">
+    <a href="../05-builder-adversary/index.html" class="nav-btn">← Предыдущий урок</a>
+    <a href="../../catalog.html" class="nav-btn primary">Курс пройден → в каталог</a>
+  </div>
+
+</article>
+<footer>
+  <div class="container">
+    <p>© 2026 Artur A. · ИИ-агенты на практике</p>
+  </div>
+</footer>
+
+<script>
+function checkAnswer(element, isCorrect) {
+  const card = element.closest('.card');
+  const options = card.querySelectorAll('.quiz-option');
+  const resultDiv = card.querySelector('.result');
+  if (isCorrect) {
+    options.forEach(opt => {
+      opt.style.pointerEvents = 'none';
+      if (opt === element) opt.classList.add('correct');
+      else opt.classList.add('disabled');
+    });
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(16,185,129,0.1)';
+    resultDiv.style.border = '1px solid var(--success)';
+    resultDiv.innerHTML = '<strong>✅ Правильно!</strong>';
+  } else {
+    element.classList.add('wrong');
+    element.style.pointerEvents = 'none';
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(245,158,11,0.1)';
+    resultDiv.style.border = '1px solid var(--warning)';
+    resultDiv.innerHTML = '<strong>⚠️ Не совсем. Попробуйте другой вариант.</strong>';
+  }
+}
+</script>
+
+</body>
+</html>

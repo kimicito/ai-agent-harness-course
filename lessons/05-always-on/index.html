@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>5.3 · Всегда включён: демон, пульс и вотчдог — ИИ-агенты на практике</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+  :root { --bg: #0B0F19; --card: #111827; --text: #F3F4F6; --muted: #9CA3AF; --accent: #8B5CF6; --accent2: #06B6D4; --border: rgba(255,255,255,0.08); --success: #10B981; --warning: #F59E0B; --danger: #EF4444; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; margin: 0; overflow-x: hidden; }
+  .container { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+  header { padding: 16px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  .lesson-header { padding: 32px 0 16px; }
+  .lesson-header .phase { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+  .lesson-header h1 { margin: 8px 0; font-size: 1.8rem; line-height: 1.25; }
+  .lesson-header .meta { color: var(--muted); font-size: 0.9rem; }
+  .section { margin: 28px 0; }
+  .section h2 { color: var(--accent); font-size: 1.2rem; margin-bottom: 12px; }
+  .section h3 { color: var(--accent2); font-size: 1.05rem; margin: 20px 0 10px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 14px 0; }
+  .card-accent { border-left: 4px solid var(--accent); }
+  .card-success { border-left: 4px solid var(--success); }
+  .card-warning { border-left: 4px solid var(--warning); }
+  .highlight { background: rgba(139,92,246,0.1); padding: 2px 6px; border-radius: 4px; }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 8px 0; padding-left: 28px; position: relative; }
+  .checklist li:before { content: "☐"; position: absolute; left: 0; color: var(--accent); }
+  .example { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); border-radius: 8px; padding: 14px; margin: 12px 0; }
+  .example-label { color: var(--accent2); font-size: 0.75rem; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .nav-footer { display: flex; justify-content: space-between; padding: 32px 0; border-top: 1px solid var(--border); margin-top: 32px; flex-wrap: wrap; gap: 8px; }
+  .nav-btn { padding: 10px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); text-decoration: none; transition: all 0.2s; }
+  .nav-btn:hover { border-color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); border-color: var(--accent); }
+  footer { padding: 32px 16px; text-align: center; color: var(--muted); border-top: 1px solid var(--border); }
+  .card + .card { margin-top: 40px; }
+  .quiz-option + .quiz-option { margin-top: 8px; }
+  .card-accent:has(.quiz-option) { border-left: none; border-top: 3px solid var(--accent); }
+  .quiz-option { display: block; word-wrap: break-word; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; cursor: pointer; transition: all 0.2s; }
+  .quiz-option:hover { border-color: var(--accent); }
+  .quiz-option.correct { border-color: var(--success); background: rgba(16,185,129,0.1); }
+  .quiz-option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.1); }
+  .quiz-option.disabled { opacity: 0.5; pointer-events: none; }
+  .result { display: none; padding: 16px; border-radius: 8px; margin: 16px 0; }
+  .result.show { display: block; }
+  pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; }
+  ul, ol { padding-left: 20px; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.9rem; }
+  th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--accent); font-weight: 600; }
+  .compare-box { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  .compare-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  @media (max-width: 768px) {
+    .lesson-header h1 { font-size: 1.4rem; }
+    .compare-box { grid-template-columns: 1fr; }
+    .nav-footer { flex-direction: column; }
+    .nav-btn { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <a href="../../index.html" class="logo">🧠 ИИ-агенты на практике</a>
+    <a href="../../catalog.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">← Каталог</a> <span style="color: var(--border); margin: 0 8px;">|</span> <a href="../../glossary.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">📖 Термины</a>
+  </div>
+</header>
+
+<article class="container">
+
+  <div class="lesson-header">
+    <div class="phase">🛠 УРОВЕНЬ 5 · ИНЖЕНЕР ХАРНЕССА: АГЕНТ БЕЗ НАДЗОРА</div>
+    <h1>5.3 · Всегда включён: демон, пульс и вотчдог</h1>
+    <div class="meta">🎯 С кодом (Python) · ✅ Интерактивный квиз · ⏱️ ~13 минут</div>
+  </div>
+
+  <!-- ЗАЧЕМ -->
+  <div class="section">
+    <h2>🎯 Зачем это бизнесу</h2>
+    <p>До этого уровня агент работал по вызову: дали задачу — сделал. Но многие процессы не ждут кнопки: входящие письма, заявки, мониторинг цен, ежедневные отчёты. Нужен агент-<strong>дежурный</strong>: работает 24/7, принимает задачи из очереди, раскладывает результаты по папкам «сделано/ошибка», а если упал — сам поднимается или честно зовёт человека.</p>
+    <p>Ключевой сдвиг мышления: <strong>сам факт «сервис жив» — тоже функциональность</strong>, которую надо проектировать. Процесс, который «наверное работает», — не работает.</p>
+  </div>
+
+  <!-- ЧТО ИЗУЧАЕМ -->
+  <div class="section">
+    <h2>📚 Что изучаем</h2>
+
+    <h3>Минимальный дежурный агент: три детали</h3>
+    <div class="card card-accent">
+      <pre>while running:                        # 1. Цикл с флагом
+    write_heartbeat()                  #    «я жив, вот время»
+    for task in incoming_dir:          # 2. Очередь = папка файлов
+        try:
+            result = process(task)     #    задача -&gt; done/
+            move(task, done_dir, result)
+        except Exception:
+            move(task, failed_dir)     #    ошибка -&gt; failed/ (не потеряна!)
+    sleep(interval)
+
+# SIGTERM -&gt; running = False         # 3. Вежливая остановка:
+#    «доделал текущую и лёг»,        #    а не рубим посреди записи</pre>
+    </div>
+    <p>Обратите внимание: <strong>ошибка не прячется</strong>. Задача, которая не обработалась, лежит в <code>failed/</code> со следом — её можно разобрать утром. Это знакомый по курсу принцип: отчёт без сверки — рассказ; а здесь — задача без папки <code>failed/</code> — потерянная заявка.</p>
+
+    <h3>Пульс: как услышать «мне плохо»</h3>
+    <p>Демон пишет в файл текущее время на каждом витке цикла. Это <span class="highlight">heartbeat</span> — пульс. Он нужен не демону, а <em>наблюдателю</em>: по свежести timestamp решается, жив процесс или завис. Процесс может быть «зелёным» в списке задач и при этом мёртвым по делу — вот почему «процесс запущен» ничего не доказывает, а пульс — доказывает.</p>
+
+    <h3>Вотчдог: надзиратель с двумя диагнозами</h3>
+    <div class="card">
+      <table>
+        <tr><th>Диагноз</th><th>Симптом</th><th>Лечение</th></tr>
+        <tr><td><strong>Крах</strong></td><td>Процесс завершился сам</td><td>Перезапустить</td></tr>
+        <tr><td><strong>Зависание</strong></td><td>Процесс жив, но пульсу старше N секунд</td><td>Убить и перезапустить</td></tr>
+      </table>
+      <p style="margin-top:8px; color: var(--muted); font-size: 0.9rem;">Перезапуск — с экспоненциальной задержкой: 5 секунд, 10, 20… Если проблема внешняя (сеть, API упал), мгновенные перезапуски только долбят мёртвый сервис. После предела подряд (например, 5) — критический алерт человеку и честная сдача: «я не справляюсь, разберите».</p>
+    </div>
+
+    <h3>Тот же паттерн — без единой строчки кода</h3>
+    <p>Если у вас платформа типа OpenClaw, Claude Code или n8n — там дежурные агенты собираются штатными средствами: <strong>расписание (cron)</strong> вместо цикла, <strong>heartbeat-файл</strong> с отметкой времени последнего прогона вместо пульса процесса, <strong>уведомление «HEARTBEAT_OK»</strong> в мессенджер вместо вотчдога. Семантика один в один: дежуришь — стучишься; не стучишься — тебя будят.</p>
+    <div class="example">
+      <div class="example-label">Пример · ежедневный отчёт закупщику</div>
+      <p>Агент по cron каждое утро собирает бриф и шлёт владельцу. В heartbeat-файле отметка времени последней успешной отправки. Если в 09:05 отметки нет — платформа сама пингует агента-надзирателя, тот разбирает причину (упал источник данных? исчерпан лимит?) и либо чинит, либо будит человека с диагнозом. Это и есть вотчдог — просто вместо процессов он следит за отметками.</p>
+    </div>
+    <div class="card card-warning">
+      <p><strong>Три правила дежурного агента.</strong> (1) Любая задача заканчивается в <code>done/</code> или <code>failed/</code> — промежуточных состояний нет. (2) Пульс пишется даже когда задач нет — «здоров и скучает» тоже статус. (3) Вежливая остановка обязательна: демон, убитый посреди записи файла, оставляет после себя разорванное состояние — правило контрольных точек из урока 1.4 действует и здесь.</p>
+    </div>
+  </div>
+
+  <!-- КАК ПРИМЕНИТЬ -->
+  <div class="section">
+    <h2>🛠️ Как применить</h2>
+    <div class="card card-success">
+      <h4>📥 Почта: входящие → обработанные</h4>
+      <p>Письмо пришло — демон классифицирует, черновик ответа в <code>done/</code>, неразбериха в <code>failed/</code> с причиной. Пульс раз в минуту. Утром вы видите не «что там за ночь пришло», а «что сделано, что требует вас».</p>
+    </div>
+    <div class="card card-success">
+      <h4>🛒 Заявки на малоценные ТМЦ</h4>
+      <p>Заявка падает в общую папку — агент проверяет комплектность по чек-листу (урок 0.3), заполняет карточку или отправляет заявку в <code>failed/</code> с точным списком недостающего. Оператор работает только с исключениями.</p>
+    </div>
+    <div class="card card-success">
+      <h4>📈 Мониторинг цен поставщиков</h4>
+      <p>Раз в час — обход прайсов, изменения в отчёт, пульс обновлён. Источник не ответил — задача в <code>failed/</code>, отчёт честно помечен «данные на 14:00». Вотчдог поднимет демон, если сам обход не начался вовсе.</p>
+    </div>
+  </div>
+
+  <!-- ЧЕКЛИСТ -->
+  <div class="section">
+    <h2>✅ Чеклист принятия результата</h2>
+    <ul class="checklist">
+      <li>У дежурного агента есть очередь задач, и каждая заканчивается в done/ или failed/ — без потерь</li>
+      <li>Пульс пишется на каждом витке, в том числе когда задач нет</li>
+      <li>Надзиратель различает крах и зависание и перезапускает с нарастающей задержкой</li>
+      <li>После предела подряд неудач — алерт человеку, а не бесконечные попытки</li>
+      <li>Остановка вежливая: текущая задача доводится до конца или до контрольной точки</li>
+      <li>В no-code-контуре (cron + heartbeat-файл + уведомление) семантика та же</li>
+    </ul>
+  </div>
+
+  <!-- КВИЗ -->
+  <div class="section">
+    <h2>📝 Проверка понимания</h2>
+    <div class="card card-accent">
+      <p><strong>Вопрос 1:</strong> Зачем демону heartbeat-файл, если процесс и так виден в системе?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Для красивых графиков нагрузки</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Процесс может быть «запущен», но зависшим; свежий пульс доказывает, что цикл реально ходит</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Чтобы занимать меньше памяти</div>
+      <div class="result" id="result1"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 2:</strong> Почему перезапуски делают с экспоненциальной задержкой?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Чтобы процесс отдохнул</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Если причина внешняя (сеть, упавший API), мгновенные перезапуски только долбят мёртвый сервис и множат ошибки</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Так требует стандарт Python</div>
+      <div class="result" id="result2"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 3:</strong> Что должно произойти с задачей, которую агент обработать не смог?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Пропустить и идти к следующей — поток не должен останавливаться</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Она попадает в failed/ со следом и причиной — потерянных задач быть не должно</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Повторять её бесконечно, пока не получится</div>
+      <div class="result" id="result3"></div>
+    </div>
+  </div>
+
+  <!-- ГЛАВНОЕ -->
+  <div class="section">
+    <div class="card card-success">
+      <h3>🎯 Главное из урока</h3>
+      <p><strong>Дежурный агент — это не скрипт, а служба: цикл, пульс, надзиратель.</strong> «Жив» — значит «стучится», а не «не упал». Ошибки складываются в failed/, а не исчезают. Восстановление — с задержкой и пределом, после которого честная сдача человеку. И весь этот паттерн работает и без кода — на cron, отметках времени и уведомлениях.</p>
+    </div>
+    <div class="card">
+      <p style="color: var(--muted); font-size: 0.85rem;">📚 По мотивам главы 16 книги «Hands-on AI Agents» (Antonio Gulli) — репозиторий <code>agulli/atlas-agents</code>, используется с разрешения автора; код и примеры адаптированы.</p>
+    </div>
+  </div>
+
+  <div class="nav-footer">
+    <a href="../05-self-correcting-loop/index.html" class="nav-btn">← Предыдущий урок</a>
+    <a href="../05-builder-adversary/index.html" class="nav-btn primary">Следующий урок →</a>
+  </div>
+
+</article>
+<footer>
+  <div class="container">
+    <p>© 2026 Artur A. · ИИ-агенты на практике</p>
+  </div>
+</footer>
+
+<script>
+function checkAnswer(element, isCorrect) {
+  const card = element.closest('.card');
+  const options = card.querySelectorAll('.quiz-option');
+  const resultDiv = card.querySelector('.result');
+  if (isCorrect) {
+    options.forEach(opt => {
+      opt.style.pointerEvents = 'none';
+      if (opt === element) opt.classList.add('correct');
+      else opt.classList.add('disabled');
+    });
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(16,185,129,0.1)';
+    resultDiv.style.border = '1px solid var(--success)';
+    resultDiv.innerHTML = '<strong>✅ Правильно!</strong>';
+  } else {
+    element.classList.add('wrong');
+    element.style.pointerEvents = 'none';
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(245,158,11,0.1)';
+    resultDiv.style.border = '1px solid var(--warning)';
+    resultDiv.innerHTML = '<strong>⚠️ Не совсем. Попробуйте другой вариант.</strong>';
+  }
+}
+</script>
+
+</body>
+</html>

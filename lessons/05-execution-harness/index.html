@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>5.1 · Харнесс: пропускной пункт между моделью и миром — ИИ-агенты на практике</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+  :root { --bg: #0B0F19; --card: #111827; --text: #F3F4F6; --muted: #9CA3AF; --accent: #8B5CF6; --accent2: #06B6D4; --border: rgba(255,255,255,0.08); --success: #10B981; --warning: #F59E0B; --danger: #EF4444; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; margin: 0; overflow-x: hidden; }
+  .container { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+  header { padding: 16px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  .lesson-header { padding: 32px 0 16px; }
+  .lesson-header .phase { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+  .lesson-header h1 { margin: 8px 0; font-size: 1.8rem; line-height: 1.25; }
+  .lesson-header .meta { color: var(--muted); font-size: 0.9rem; }
+  .section { margin: 28px 0; }
+  .section h2 { color: var(--accent); font-size: 1.2rem; margin-bottom: 12px; }
+  .section h3 { color: var(--accent2); font-size: 1.05rem; margin: 20px 0 10px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 14px 0; }
+  .card-accent { border-left: 4px solid var(--accent); }
+  .card-success { border-left: 4px solid var(--success); }
+  .card-warning { border-left: 4px solid var(--warning); }
+  .highlight { background: rgba(139,92,246,0.1); padding: 2px 6px; border-radius: 4px; }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 8px 0; padding-left: 28px; position: relative; }
+  .checklist li:before { content: "☐"; position: absolute; left: 0; color: var(--accent); }
+  .example { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); border-radius: 8px; padding: 14px; margin: 12px 0; }
+  .example-label { color: var(--accent2); font-size: 0.75rem; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .nav-footer { display: flex; justify-content: space-between; padding: 32px 0; border-top: 1px solid var(--border); margin-top: 32px; flex-wrap: wrap; gap: 8px; }
+  .nav-btn { padding: 10px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); text-decoration: none; transition: all 0.2s; }
+  .nav-btn:hover { border-color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); border-color: var(--accent); }
+  footer { padding: 32px 16px; text-align: center; color: var(--muted); border-top: 1px solid var(--border); }
+  .card + .card { margin-top: 40px; }
+  .quiz-option + .quiz-option { margin-top: 8px; }
+  .card-accent:has(.quiz-option) { border-left: none; border-top: 3px solid var(--accent); }
+  .quiz-option { display: block; word-wrap: break-word; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; cursor: pointer; transition: all 0.2s; }
+  .quiz-option:hover { border-color: var(--accent); }
+  .quiz-option.correct { border-color: var(--success); background: rgba(16,185,129,0.1); }
+  .quiz-option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.1); }
+  .quiz-option.disabled { opacity: 0.5; pointer-events: none; }
+  .result { display: none; padding: 16px; border-radius: 8px; margin: 16px 0; }
+  .result.show { display: block; }
+  pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; }
+  ul, ol { padding-left: 20px; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.9rem; }
+  th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--accent); font-weight: 600; }
+  .compare-box { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  .compare-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  @media (max-width: 768px) {
+    .lesson-header h1 { font-size: 1.4rem; }
+    .compare-box { grid-template-columns: 1fr; }
+    .nav-footer { flex-direction: column; }
+    .nav-btn { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <a href="../../index.html" class="logo">🧠 ИИ-агенты на практике</a>
+    <a href="../../catalog.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">← Каталог</a> <span style="color: var(--border); margin: 0 8px;">|</span> <a href="../../glossary.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">📖 Термины</a>
+  </div>
+</header>
+
+<article class="container">
+
+  <div class="lesson-header">
+    <div class="phase">🛠 УРОВЕНЬ 5 · ИНЖЕНЕР ХАРНЕССА: АГЕНТ БЕЗ НАДЗОРА</div>
+    <h1>5.1 · Харнесс: пропускной пункт между моделью и миром</h1>
+    <div class="meta">🎯 С кодом (Python) · ✅ Интерактивный квиз · ⏱️ ~14 минут</div>
+  </div>
+
+  <!-- ЗАЧЕМ -->
+  <div class="section">
+    <h2>🎯 Зачем это бизнесу</h2>
+    <p>Агент с доступом к файлам и командам — это сотрудник с ключами от всего офиса. Уровни 0–4 научили его дисциплине: папка проекта, договоры задач, роли. Но дисциплина — это инструкции, а инструкции модель иногда нарушает. Харнесс (англ. <em>harness</em> — «упряжь») решает это физически: <strong>слой между моделью и миром, через который проходит каждое действие</strong>. Модель может попросить что угодно — харнесс решает, что реально случится.</p>
+    <p>Разница принципиальна: «не удаляй файлы» — просьба. «Команда <code>rm</code> не входит в белый список» — свойство системы. Первое нарушается в пятницу вечером, второе — никогда.</p>
+  </div>
+
+  <!-- ЧТО ИЗУЧАЕМ -->
+  <div class="section">
+    <h2>📚 Что изучаем</h2>
+
+    <h3>Четыре механики харнесса</h3>
+    <div class="card">
+      <table>
+        <tr><th>Механика</th><th>Что делает</th><th>Почему работает</th></tr>
+        <tr><td><strong>1. Песочница путей</strong></td><td>Перед любой записью/чтением путь разворачивается до абсолютного и проверяется: остался ли внутри рабочей папки</td><td><code>resolve()</code> схлопывает все «..» и симлинки до проверки — обойти нельзя</td></tr>
+        <tr><td><strong>2. Белый список команд</strong></td><td>Запускает только разрешённые исполняемые файлы (например: pytest, git, python)</td><td>Всё остальное отсекается до запуска, а не после беды</td></tr>
+        <tr><td><strong>3. Верификация при записи</strong></td><td>Каждый .py после записи проходит проверку синтаксиса и линт — по exit-кодам, не по словам модели</td><td>Решение «годно/не годно» принимает машина — тот же принцип, что постусловие из урока 2.2</td></tr>
+        <tr><td><strong>4. Журнал траектории</strong></td><td>Каждое действие агента записывается в лог (какой инструмент, какие аргументы, результат)</td><td>Аудит и повтор: «покажи, как агент это сделал» — как след из урока 3.5</td></tr>
+      </table>
+    </div>
+
+    <h3>Песочница: три строчки, которые не обойти</h3>
+    <div class="card card-accent">
+      <pre>def validate_path(self, rel_path):
+    # resolve() разворачивает '../..' и символические ссылки
+    target = (self.workspace / rel_path).resolve()
+    if not target.is_relative_to(self.workspace):
+        raise PermissionError(f"{rel_path} выходит за пределы")
+    return target
+
+# Попытка write_file("../../../etc/passwd") -&gt; PermissionError</pre>
+      <p style="margin-top:10px; color: var(--muted); font-size: 0.9rem;">Ключевая идея: сравнивать надо <em>после</em> разворачивания пути, а не до. Проверка строки «нет ли в пути двоеточий» ломается десятком трюков; проверка результата <code>resolve()</code> — не ломается ничем.</p>
+    </div>
+
+    <h3>Верификация — внутренняя, а не инструмент агента</h3>
+    <p>Тонкость из практики: проверка кода <strong>не проходит через тот же канал, что команды агента</strong>. Линт после записи — это бухгалтерия харнесса, а не действие модели. Поэтому в журнале траектории она не появляется: агент не может «попросить» пропустить верификацию, перезапустить её или подделать результат — она происходит мимо него.</p>
+
+    <h3>Страховка от «чинил-чинил — сломал»: откат</h3>
+    <p>Типичный сценарий без отката: агент пишет файл, проверка падает, агент чинит — хуже, чинит снова — ещё хуже. После трёх попыток файл сломан сильнее, чем до начала. Расширение харнесса — <span class="highlight">снапшот до первой записи</span>: если после N попыток проверка всё ещё красная, файл автоматически возвращается в исходное состояние, агент получает чистую ошибку «откатились к оригиналу — начните заново».</p>
+    <div class="card card-warning">
+      <p><strong>Правило простое:</strong> агент никогда не должен оставлять после себя состояние хуже исходного. Либо улучшил и проверка зелёная, либо откат. «Почти починил» — не существует.</p>
+    </div>
+  </div>
+
+  <!-- КАК ПРИМЕНИТЬ -->
+  <div class="section">
+    <h2>🛠️ Как применить</h2>
+    <div class="card card-success">
+      <h4>📊 Бухгалтерия: агент собирает отчёт</h4>
+      <p>Харнесс ограничивает его рабочей папкой отчёта: записать в соседнюю с клиентскими данными — физически нельзя. Запустить что-то кроме конвертера и линтера — нельзя. Журнал траектории — готовый ответ на вопрос аудитора «кто и когда менял цифру».</p>
+    </div>
+    <div class="card card-success">
+      <h4>⚖️ Юриспруденция: агент готовит договор</h4>
+      <p>Шаблоны — только чтение, черновики — только в папку сделки, внешние команды запрещены полностью. Модель галлюцинировала пункт — не страшно, это черновик в песочнице. Модель «захотела» что-то удалить — харнесс не пустит.</p>
+    </div>
+    <div class="card card-success">
+      <h4>🛒 Закупки: агент ведёт реестр цен</h4>
+      <p>Запись в реестр сопровождается верификацией формата (все колонки, валюта, дата). Файл с битой строкой просто не принимается — агент обязан исправить до записи, а не «исправлю потом».</p>
+    </div>
+  </div>
+
+  <!-- ЧЕКЛИСТ -->
+  <div class="section">
+    <h2>✅ Чеклист принятия результата</h2>
+    <ul class="checklist">
+      <li>У агента с доступом к файлам/командам есть слой-харнесс, а не только инструкции</li>
+      <li>Пути проверяются после resolve() — «..» и симлинки не спасают</li>
+      <li>Команды — по белому списку, всё прочее отсекается до запуска</li>
+      <li>Верификация результата идёт по exit-кодам и не является инструментом агента</li>
+      <li>Журнал траектории пишется на каждое действие — можно восстановить «как было»</li>
+      <li>После серии неудачных правок — автоматический откат к исходному состоянию</li>
+    </ul>
+  </div>
+
+  <!-- КВИЗ -->
+  <div class="section">
+    <h2>📝 Проверка понимания</h2>
+    <div class="card card-accent">
+      <p><strong>Вопрос 1:</strong> Почему проверка пути делается ПОСЛЕ resolve(), а не по строке «нет ли .. в пути»?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Так принято в стандартах безопасности</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Строку пути можно обмануть (симлинки, двойные развёртывания), а развёрнутый абсолютный путь сравнивается с границей надёжно</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Это быстрее работает</div>
+      <div class="result" id="result1"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 2:</strong> Почему верификация кода не должна быть «ещё одним инструментом агента»?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Чтобы экономить токены на вызовы</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Инструмент агент может попросить пропустить или подделать; внутренняя проверка происходит мимо модели и её решений</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Чтобы лог траектории был короче</div>
+      <div class="result" id="result2"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 3:</strong> Зачем харнессу механизм отката файла к исходному состоянию?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Чтобы сэкономить место на диске</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Серия неудачных «починок» оставляет файл хуже исходного; откат гарантирует: либо улучшение, либо ничего</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Чтобы агент не скучал</div>
+      <div class="result" id="result3"></div>
+    </div>
+  </div>
+
+  <!-- ГЛАВНОЕ -->
+  <div class="section">
+    <div class="card card-success">
+      <h3>🎯 Главное из урока</h3>
+      <p><strong>Инструкции модель нарушает, свойства системы — нет.</strong> Харнесс превращает просьбы в свойства: песочница путей, белый список команд, верификация по exit-кодам мимо воли агента, журнал каждого действия и откат после безуспешных чинок. Агент с харнессом может ошибаться — но не может навредить.</p>
+    </div>
+    <div class="card">
+      <p style="color: var(--muted); font-size: 0.85rem;">📚 По мотивам главы 15 книги «Hands-on AI Agents» (Antonio Gulli) — репозиторий <code>agulli/atlas-agents</code>, используется с разрешения автора; код и примеры адаптированы.</p>
+    </div>
+  </div>
+
+  <div class="nav-footer">
+    <a href="../04-monthly-cleaning/index.html" class="nav-btn">← Предыдущий урок</a>
+    <a href="../05-self-correcting-loop/index.html" class="nav-btn primary">Следующий урок →</a>
+  </div>
+
+</article>
+<footer>
+  <div class="container">
+    <p>© 2026 Artur A. · ИИ-агенты на практике</p>
+  </div>
+</footer>
+
+<script>
+function checkAnswer(element, isCorrect) {
+  const card = element.closest('.card');
+  const options = card.querySelectorAll('.quiz-option');
+  const resultDiv = card.querySelector('.result');
+  if (isCorrect) {
+    options.forEach(opt => {
+      opt.style.pointerEvents = 'none';
+      if (opt === element) opt.classList.add('correct');
+      else opt.classList.add('disabled');
+    });
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(16,185,129,0.1)';
+    resultDiv.style.border = '1px solid var(--success)';
+    resultDiv.innerHTML = '<strong>✅ Правильно!</strong>';
+  } else {
+    element.classList.add('wrong');
+    element.style.pointerEvents = 'none';
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(245,158,11,0.1)';
+    resultDiv.style.border = '1px solid var(--warning)';
+    resultDiv.innerHTML = '<strong>⚠️ Не совсем. Попробуйте другой вариант.</strong>';
+  }
+}
+</script>
+
+</body>
+</html>

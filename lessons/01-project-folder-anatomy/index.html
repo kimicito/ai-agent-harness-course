@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>1.2 · Анатомия папки проекта — ИИ-агенты на практике</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+  :root { --bg: #0B0F19; --card: #111827; --text: #F3F4F6; --muted: #9CA3AF; --accent: #8B5CF6; --accent2: #06B6D4; --border: rgba(255,255,255,0.08); --success: #10B981; --warning: #F59E0B; --danger: #EF4444; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; margin: 0; overflow-x: hidden; }
+  .container { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+  header { padding: 16px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  .lesson-header { padding: 32px 0 16px; }
+  .lesson-header .phase { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+  .lesson-header h1 { margin: 8px 0; font-size: 1.8rem; line-height: 1.25; }
+  .lesson-header .meta { color: var(--muted); font-size: 0.9rem; }
+  .section { margin: 28px 0; }
+  .section h2 { color: var(--accent); font-size: 1.2rem; margin-bottom: 12px; }
+  .section h3 { color: var(--accent2); font-size: 1.05rem; margin: 20px 0 10px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 14px 0; }
+  .card-accent { border-left: 4px solid var(--accent); }
+  .card-success { border-left: 4px solid var(--success); }
+  .card-warning { border-left: 4px solid var(--warning); }
+  .highlight { background: rgba(139,92,246,0.1); padding: 2px 6px; border-radius: 4px; }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 8px 0; padding-left: 28px; position: relative; }
+  .checklist li:before { content: "☐"; position: absolute; left: 0; color: var(--accent); }
+  .example { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); border-radius: 8px; padding: 14px; margin: 12px 0; }
+  .example-label { color: var(--accent2); font-size: 0.75rem; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .nav-footer { display: flex; justify-content: space-between; padding: 32px 0; border-top: 1px solid var(--border); margin-top: 32px; flex-wrap: wrap; gap: 8px; }
+  .nav-btn { padding: 10px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); text-decoration: none; transition: all 0.2s; }
+  .nav-btn:hover { border-color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); border-color: var(--accent); }
+  footer { padding: 32px 16px; text-align: center; color: var(--muted); border-top: 1px solid var(--border); }
+  .card + .card { margin-top: 40px; }
+  .quiz-option + .quiz-option { margin-top: 8px; }
+  .card-accent:has(.quiz-option) { border-left: none; border-top: 3px solid var(--accent); }
+  .quiz-option { display: block; word-wrap: break-word; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; cursor: pointer; transition: all 0.2s; }
+  .quiz-option:hover { border-color: var(--accent); }
+  .quiz-option.correct { border-color: var(--success); background: rgba(16,185,129,0.1); }
+  .quiz-option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.1); }
+  .quiz-option.disabled { opacity: 0.5; pointer-events: none; }
+  .result { display: none; padding: 16px; border-radius: 8px; margin: 16px 0; }
+  .result.show { display: block; }
+  pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; }
+  ul, ol { padding-left: 20px; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.9rem; }
+  th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--accent); font-weight: 600; }
+  .compare-box { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  .compare-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  @media (max-width: 768px) {
+    .lesson-header h1 { font-size: 1.4rem; }
+    .compare-box { grid-template-columns: 1fr; }
+    .nav-footer { flex-direction: column; }
+    .nav-btn { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <a href="../../index.html" class="logo">🧠 ИИ-агенты на практике</a>
+    <a href="../../catalog.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">← Каталог</a> <span style="color: var(--border); margin: 0 8px;">|</span> <a href="../../glossary.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">📖 Термины</a>
+  </div>
+</header>
+
+<article class="container">
+
+  <div class="lesson-header">
+    <div class="phase">📁 УРОВЕНЬ 1 · ПАПКА ПРОЕКТА: ЕДИНЫЙ ИСТОЧНИК ИСТИНЫ</div>
+    <h1>1.2 · Анатомия папки проекта</h1>
+    <div class="meta">🎯 Без кода · ✅ Интерактивный квиз · ⏱️ ~12 минут</div>
+  </div>
+
+  <!-- ЗАЧЕМ -->
+  <div class="section">
+    <h2>🎯 Зачем это бизнесу</h2>
+    <p>У вас уже есть файлы: «КП_финал_2_правка.docx», «итоги_встречи_старые.txt», три версии таблицы в разных чатах. Агент честно работает с тем, что находит, — и путается так же, как новичок в первый день. Хаос вокруг агента = хаос в его результатах.</p>
+    <p>Решение не в «более умной нейросети», а в <span class="highlight">едином источнике истины</span>: одной папке проекта, где лежит всё, что агенту положено знать, — и ничего лишнего.</p>
+  </div>
+
+  <!-- ЧТО ИЗУЧАЕМ -->
+  <div class="section">
+    <h2>📚 Что изучаем</h2>
+
+    <h3>Четыре файла вместо хаоса</h3>
+    <p>Полноценная упряжь проекта — это четыре файла простыми словами. Не «система документооборота», а четыре текстовых файла в одной папке.</p>
+
+    <div class="card card-accent">
+      <h3>📋 ИНСТРУКЦИЯ.md — кто агент и как работает</h3>
+      <pre>Роль: помощник отдела закупок.
+Стиль: кратко, таблицы — в markdown.
+Запреты: не выдумывать цены; не предлагать
+предоплату для контрагентов из чёрного списка
+(см. РЕШЕНИЯ.md, март).
+Авторитет: если инструкция и мой устный комментарий
+расходятся — побеждает инструкция, спроси.</pre>
+    </div>
+
+    <div class="card card-accent">
+      <h3>📈 ПРОГРЕСС.md — марковское состояние проекта</h3>
+      <pre>Текущая задача: сравнение КП на инструменты, этап 2/3.
+Сделано: 12 КП получено, 9 обработано (см. таблицу).
+Дальше: дождаться КП от «Метрологии», сверить НДС.
+Правило: каждая сессия начинается с чтения этого файла
+и заканчивается его обновлением.</pre>
+    </div>
+
+    <div class="card card-accent">
+      <h3>⚖️ РЕШЕНИЯ.md — почему так, а не иначе</h3>
+      <pre>2026-09-28: отказались от индексации цен в договорах
+на 2027 — риск скрытой инфляции выше выгоды.
+2026-10-02: черный список контрагентов ведём в файле
+поставщиков, не в голове у менеджера.</pre>
+      <p style="margin-top:8px; color: var(--muted); font-size: 0.85rem;">Без «почему» агент через месяц предложит отменённое решение заново — оно же рационально выглядит.</p>
+    </div>
+
+    <div class="card card-accent">
+      <h3>✅ ЧЕК-ЛИСТЫ.md — как принимаем результат</h3>
+      <pre>Шаблон приёмки сравнения цен (урок 0.3):
+- в таблице все КП из входящих писем
+- у каждой цены есть источник
+- валюта и НДС приведены единообразно</pre>
+    </div>
+
+    <h3>Главное правило: файл побеждает память</h3>
+    <div class="card card-success">
+      <p><strong>Конфликт «агент помнит по-своему» vs «написано в файле» разрешается в пользу файла.</strong> Это дисциплинирует и вас: поправили договорённость — сразу поправьте файл. Процесс, который нельзя нарушить, ломается в первый же день, когда его нарушили «один раз».</p>
+    </div>
+
+    <h3>Чего НЕ класть в папку проекта</h3>
+    <div class="card card-warning">
+      <ul>
+        <li><strong>Личные данные и секреты.</strong> Пароли, паспорта, реквизиты карт — инвариант из уровня 2: в агента не несём никогда.</li>
+        <li><strong>Переписку целиком.</strong> Выжимки решений — в РЕШЕНИЯ.md, а не простыни чата: мусор размывает главное.</li>
+        <li><strong>Черновики «на всякий случай».</strong> Устаревшее в папке — хуже, чем отсутствующее: агент честно использует то, что нашёл.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- КАК ПРИМЕНИТЬ -->
+  <div class="section">
+    <h2>🛠️ Как применить</h2>
+    <p>Не стройте всё сразу — начните с одного файла.</p>
+    <div class="card card-success">
+      <h4>Шаг 1 (сегодня): создайте ПРОГРЕСС.md</h4>
+      <p>Один файл: текущая задача, сделано, дальше. Уже завтра новая сессия начнётся без пересказа.</p>
+    </div>
+    <div class="card card-success">
+      <h4>Шаг 2 (неделя): добавьте ИНСТРУКЦИЮ.md</h4>
+      <p>Когда поймаете агента на повторной ошибке — запишите правило в инструкцию, а не в чат.</p>
+    </div>
+    <div class="card card-success">
+      <h4>Шаг 3 (месяц): РЕШЕНИЯ.md и ЧЕК-ЛИСТЫ.md</h4>
+      <p>Решения — по факту спорных ситуаций. Чек-листы — переносите из урока 0.3 по мере внедрения.</p>
+    </div>
+    <div class="card card-success">
+      <h4>🚚 Логист</h4>
+      <p>Папка «Перевозки-2026»: ИНСТРУКЦИЯ (форматы ставок, ТК с допуском на опасные грузы), ПРОГРЕСС (текущие маршруты), РЕШЕНИЯ (почему отказались от перевозчика X), ЧЕК-ЛИСТЫ (как принимаем расчёт ставки).</p>
+    </div>
+  </div>
+
+  <!-- ЧЕКЛИСТ -->
+  <div class="section">
+    <h2>✅ Чеклист принятия результата</h2>
+    <ul class="checklist">
+      <li>У проекта есть одна папка — единый источник истины</li>
+      <li>В папке есть ИНСТРУКЦИЯ.md и ПРОГРЕСС.md</li>
+      <li>Спорные договорённости попадают в РЕШЕНИЯ.md с датой и причиной</li>
+      <li>Секреты и переписка целиком в папку не попадают</li>
+      <li>При конфликте «память агента» против файла побеждает файл</li>
+    </ul>
+  </div>
+
+  <!-- КВИЗ -->
+  <div class="section">
+    <h2>📝 Проверка понимания</h2>
+    <div class="card card-accent">
+      <p><strong>Вопрос 1:</strong> Зачем файл РЕШЕНИЯ.md, если есть ИНСТРУКЦИЯ.md?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Это дублирующая копия на случай потери</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Инструкция говорит ЧТО делать, решения — ПОЧЕМУ; без «почему» агент предложит отменённое решение заново</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Для красоты структуры</div>
+      <div class="result" id="result1"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 2:</strong> Что делать, если агент «помнит» правило иначе, чем написано в файле?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">A) Считать верным файл — и поправить файл, если реальность изменилась</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">B) Спорить с агентом в чате</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Открыть новую сессию и надеяться</div>
+      <div class="result" id="result2"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 3:</strong> С чего начинать внедрение папки проекта?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Сразу создать все четыре файла и заполнить идеально</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) С одного ПРОГРЕСС.md, остальное — по мере ошибок и споров</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) С покупки корпоративной системы знаний</div>
+      <div class="result" id="result3"></div>
+    </div>
+  </div>
+
+  <!-- ГЛАВНОЕ -->
+  <div class="section">
+    <div class="card card-success">
+      <h3>🎯 Главное из урока</h3>
+      <p><strong>Единый источник истины — это четыре текстовых файла:</strong> инструкция (как работаем), прогресс (где мы), решения (почему так), чек-листы (как принимаем). Файл побеждает память. Начните с одного файла сегодня, а не с идеальной системы никогда.</p>
+    </div>
+  </div>
+
+  <div class="nav-footer">
+    <a href="../01-unwritten-doesnt-exist/index.html" class="nav-btn">← Предыдущий урок</a>
+    <a href="../01-session-memory/index.html" class="nav-btn primary">Следующий урок →</a>
+  </div>
+
+</article>
+<footer>
+  <div class="container">
+    <p>© 2026 Artur A. · ИИ-агенты на практике</p>
+  </div>
+</footer>
+
+<script>
+function checkAnswer(element, isCorrect) {
+  const card = element.closest('.card');
+  const options = card.querySelectorAll('.quiz-option');
+  const resultDiv = card.querySelector('.result');
+  if (isCorrect) {
+    options.forEach(opt => {
+      opt.style.pointerEvents = 'none';
+      if (opt === element) opt.classList.add('correct');
+      else opt.classList.add('disabled');
+    });
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(16,185,129,0.1)';
+    resultDiv.style.border = '1px solid var(--success)';
+    resultDiv.innerHTML = '<strong>✅ Правильно!</strong>';
+  } else {
+    element.classList.add('wrong');
+    element.style.pointerEvents = 'none';
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(245,158,11,0.1)';
+    resultDiv.style.border = '1px solid var(--warning)';
+    resultDiv.innerHTML = '<strong>⚠️ Не совсем. Попробуйте другой вариант.</strong>';
+  }
+}
+</script>
+
+</body>
+</html>

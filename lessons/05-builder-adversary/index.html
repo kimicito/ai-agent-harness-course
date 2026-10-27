@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+<title>5.4 · Строитель и оппонент: спор как проверка — ИИ-агенты на практике</title>
+<link rel="stylesheet" href="../../style.css">
+<style>
+  :root { --bg: #0B0F19; --card: #111827; --text: #F3F4F6; --muted: #9CA3AF; --accent: #8B5CF6; --accent2: #06B6D4; --border: rgba(255,255,255,0.08); --success: #10B981; --warning: #F59E0B; --danger: #EF4444; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; margin: 0; overflow-x: hidden; }
+  .container { max-width: 800px; margin: 0 auto; padding: 0 16px; }
+  header { padding: 16px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 100; }
+  header .container { display: flex; justify-content: space-between; align-items: center; }
+  .logo { font-size: 1.1rem; font-weight: 700; color: var(--accent); text-decoration: none; }
+  .lesson-header { padding: 32px 0 16px; }
+  .lesson-header .phase { color: var(--accent); font-size: 0.85rem; font-weight: 600; }
+  .lesson-header h1 { margin: 8px 0; font-size: 1.8rem; line-height: 1.25; }
+  .lesson-header .meta { color: var(--muted); font-size: 0.9rem; }
+  .section { margin: 28px 0; }
+  .section h2 { color: var(--accent); font-size: 1.2rem; margin-bottom: 12px; }
+  .section h3 { color: var(--accent2); font-size: 1.05rem; margin: 20px 0 10px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin: 14px 0; }
+  .card-accent { border-left: 4px solid var(--accent); }
+  .card-success { border-left: 4px solid var(--success); }
+  .card-warning { border-left: 4px solid var(--warning); }
+  .highlight { background: rgba(139,92,246,0.1); padding: 2px 6px; border-radius: 4px; }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding: 8px 0; padding-left: 28px; position: relative; }
+  .checklist li:before { content: "☐"; position: absolute; left: 0; color: var(--accent); }
+  .example { background: rgba(6,182,212,0.05); border: 1px solid rgba(6,182,212,0.2); border-radius: 8px; padding: 14px; margin: 12px 0; }
+  .example-label { color: var(--accent2); font-size: 0.75rem; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px; }
+  .nav-footer { display: flex; justify-content: space-between; padding: 32px 0; border-top: 1px solid var(--border); margin-top: 32px; flex-wrap: wrap; gap: 8px; }
+  .nav-btn { padding: 10px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); text-decoration: none; transition: all 0.2s; }
+  .nav-btn:hover { border-color: var(--accent); }
+  .nav-btn.primary { background: var(--accent); border-color: var(--accent); }
+  footer { padding: 32px 16px; text-align: center; color: var(--muted); border-top: 1px solid var(--border); }
+  .card + .card { margin-top: 40px; }
+  .quiz-option + .quiz-option { margin-top: 8px; }
+  .card-accent:has(.quiz-option) { border-left: none; border-top: 3px solid var(--accent); }
+  .quiz-option { display: block; word-wrap: break-word; padding: 12px 16px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; margin: 8px 0; cursor: pointer; transition: all 0.2s; }
+  .quiz-option:hover { border-color: var(--accent); }
+  .quiz-option.correct { border-color: var(--success); background: rgba(16,185,129,0.1); }
+  .quiz-option.wrong { border-color: var(--danger); background: rgba(239,68,68,0.1); }
+  .quiz-option.disabled { opacity: 0.5; pointer-events: none; }
+  .result { display: none; padding: 16px; border-radius: 8px; margin: 16px 0; }
+  .result.show { display: block; }
+  pre { background: rgba(0,0,0,0.3); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; }
+  ul, ol { padding-left: 20px; }
+  li { margin: 4px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 0.9rem; }
+  th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
+  th { color: var(--accent); font-weight: 600; }
+  .compare-box { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 14px 0; }
+  .compare-item { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  @media (max-width: 768px) {
+    .lesson-header h1 { font-size: 1.4rem; }
+    .compare-box { grid-template-columns: 1fr; }
+    .nav-footer { flex-direction: column; }
+    .nav-btn { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="container">
+    <a href="../../index.html" class="logo">🧠 ИИ-агенты на практике</a>
+    <a href="../../catalog.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">← Каталог</a> <span style="color: var(--border); margin: 0 8px;">|</span> <a href="../../glossary.html" style="color: var(--muted); text-decoration: none; font-size: 0.9rem;">📖 Термины</a>
+  </div>
+</header>
+
+<article class="container">
+
+  <div class="lesson-header">
+    <div class="phase">🛠 УРОВЕНЬ 5 · ИНЖЕНЕР ХАРНЕССА: АГЕНТ БЕЗ НАДЗОРА</div>
+    <h1>5.4 · Строитель и оппонент: спор как проверка</h1>
+    <div class="meta">🎯 С кодом (Python) · ✅ Интерактивный квиз · ⏱️ ~14 минут</div>
+  </div>
+
+  <!-- ЗАЧЕМ -->
+  <div class="section">
+    <h2>🎯 Зачем это бизнесу</h2>
+    <p>В уроке 0.4 второй ИИ проверял работу первого. Но на практике проверяющий часто превращается в вежливого собеседника: «в целом неплохо, можно улучшить». Эффект адвоката бьёт по обоим — второй агент тоже умеет быть приятным. Нужна проверка с зубами и метрикой, а не с комплиментами.</p>
+    <p>Приём из этой главы: <strong>человеку показывают не результат, а разногласия</strong>. Два агента спорят между собой — и если сошлись, работа уходит в прод без вашего времени; если поспорили — вы читаете только спор, а не простыню текста.</p>
+  </div>
+
+  <!-- ЧТО ИЗУЧАЕМ -->
+  <div class="section">
+    <h2>📚 Что изучаем</h2>
+
+    <h3>Пара «строитель — оппонент»</h3>
+    <div class="card">
+      <div class="compare-box">
+        <div class="compare-item">
+          <h4 style="color: var(--accent); margin-top:0;">🔨 Строитель</h4>
+          <p>Производит артефакт: код, текст, расчёт, заявку. Его задача — полный и корректный результат.</p>
+        </div>
+        <div class="compare-item">
+          <h4 style="color: var(--danger); margin-top:0;">⚔️ Оппонент</h4>
+          <p>Не оценивает и не хвалит. Единственная работа — <strong>сломать</strong>: найти вход, на котором артефакт падает, требование, которое молча выкинули, допущение, которое было неверно с первого дня.</p>
+        </div>
+      </div>
+      <p>Промпт оппонента специально лишён права соглашаться: <em>«Согласие тебе ничего не стоит. Не предлагай улучшения. Не хвали. Ищи»</em>. Вердикт — только <code>pass</code> или <code>block</code> с конкретными находками: что ломается и на каком входе.</p>
+    </div>
+
+    <h3>Разногласие — самый информативный артефакт</h3>
+    <p>Когда строитель и оппонент согласны — работа почти всегда в порядке, и человек её не видит. Когда не согласны — <strong>это разногласие и есть то, что стоит читать</strong>: находка оппонента с сценарием воспроизведения или (что тоже бывает) его ложная тревога, показывающая неясное место в требованиях. Экономика впечатляет: вместо «прочитай 20 страниц» — «прочитай 3 абзаца спора».</p>
+
+    <h3>Детектор резиновой печати</h3>
+    <p>У оппонента есть опасная болезнь: со временем он смягчается и пропускает всё. Поэтому за ним следят статистикой: <span class="highlight">доля блокировок</span> за последние проверки. Ноль блокировок подряд — тревога: либо строители внезапно стали совершенны (не бывает), либо оппонент превратился в резиновую печать и вы платите за второго агента впустую. Лечение — перезаточить промпт оппонента. Помните Гудхарта из урока 3.4: метрика «сколько блокировок» не должна становиться целью сама по себе — важна честная доля, а не высокая.</p>
+
+    <h3>Даже «творческое» можно проверить машиной</h3>
+    <p>Возражение «а как оппонент проверит рекламный текст?» снимается прозаическим верификатором. Качество текста складывается из измеримых величин:</p>
+    <div class="card card-accent">
+      <pre>verify(text):                       # всё — формулы и regex, без модели
+    grade = flesch_kincaid(text)      # читаемость: класс &lt; 8
+    ratio = count("я/мы") / count("вы")  # фокус на читателе &lt; 0.3
+    passives = findall(пассивный залог)  # должно быть ноль
+    buzzwords = text ∩ баннер-слова    # "synergy", "seamless"...
+    len(text) ≤ лимит площадки         # 90 символов объявления и т.п.</pre>
+      <p style="margin-top:10px; color: var(--muted); font-size: 0.9rem;">Каждая метрика — формула или регулярка, ни одной модели. Такой верификатор становится условием остановки петли из урока 5.2: агент пишет черновик, сам себя проверяет и переписывает — до вас доходит уже прошедший все метрики текст.</p>
+    </div>
+    <div class="card card-warning">
+      <p><strong>Граница метода.</strong> Оппонент — это не «ещё один голос за». Если оппонент вежлив, его нет. И наоборот: если строитель и оппонент — одна и та же сессия с разными шапками, эффект ослабевает — оппонент «помнит» логику строителя. Чистая сессия, как у проверяющего из урока 4.1.</p>
+    </div>
+  </div>
+
+  <!-- КАК ПРИМЕНИТЬ -->
+  <div class="section">
+    <h2>🛠️ Как применить</h2>
+    <div class="card card-success">
+      <h4>🛒 Тендерная заявка</h4>
+      <p>Строитель заполняет формы по документации закупки. Оппонент не «оценивает качество», а ищет: какое требование из ТЗ не отражено в заявке, какая цифра противоречит сама себе, какое приложение забыто. Ваше время — только на спорные места.</p>
+    </div>
+    <div class="card card-success">
+      <h4>📢 Рекламный текст</h4>
+      <p>Строитель пишет под бренд-гайд. Сначала прогоняет прозаический верификатор (читаемость, «мы» vs «вы», баннер-слова, лимит символов), потом оппонент ищет юридически рискованные формулировки. Два фильтра, ноль вашего времени на гладкие тексты.</p>
+    </div>
+    <div class="card card-success">
+      <h4>⚖️ Договор</h4>
+      <p>Оппонент специализацией «контрстратор»: ищет пункт, который выгоден контрагенту и опасен вам, сценарий, где условие срабатывает против вас. Это развитие выборочной сверки из урока 0.3 — с агрессивной мотивацией.</p>
+    </div>
+  </div>
+
+  <!-- ЧЕКЛИСТ -->
+  <div class="section">
+    <h2>✅ Чеклист принятия результата</h2>
+    <ul class="checklist">
+      <li>У оппонента в промпте нет права соглашаться — только искать поломку</li>
+      <li>Вердикт бинарный: pass/block с конкретной находкой и сценарием воспроизведения</li>
+      <li>Человеку показываются разногласия, а не каждый результат</li>
+      <li>Согласие пары = автоматический пропуск без траты человеческого времени</li>
+      <li>Доля блокировок оппонента отслеживается; ноль подряд = перезаточка промпта</li>
+      <li>Оппонент работает в чистой сессии, не видя рассуждений строителя</li>
+      <li>«Творческие» артефакты имеют машинные метрики качества как условие остановки</li>
+    </ul>
+  </div>
+
+  <!-- КВИЗ -->
+  <div class="section">
+    <h2>📝 Проверка понимания</h2>
+    <div class="card card-accent">
+      <p><strong>Вопрос 1:</strong> Что именно читает человек в схеме «строитель — оппонент»?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Каждый артефакт целиком — вдруг оппонент ошибся</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Только разногласия: оппонент заблокировал — читаем находку и спор; согласились — человек не тратит время</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Сводку строителя о том, как всё прошло</div>
+      <div class="result" id="result1"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 2:</strong> Что означает «резиновая печать» и что с ней делать?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Оппонент слишком много блокирует — надо смягчить</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Оппонент ни разу не заблокировал за серию проверок — он перестал атаковать; перезаточить промпт</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Строитель работает слишком медленно</div>
+      <div class="result" id="result2"></div>
+    </div>
+    <div class="card card-accent">
+      <p><strong>Вопрос 3:</strong> Зачем прозаический верификатор, если есть оппонент-модель?</p>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">A) Модель не умеет работать с текстом</div>
+      <div class="quiz-option" onclick="checkAnswer(this, true)">B) Читаемость, соотношение «мы/вы», пассив, баннер-слова — формулы и regex: дёшево, стабильно и может быть условием остановки петли без модели</div>
+      <div class="quiz-option" onclick="checkAnswer(this, false)">C) Чтобы оппоненту было с кем поговорить</div>
+      <div class="result" id="result3"></div>
+    </div>
+  </div>
+
+  <!-- ГЛАВНОЕ -->
+  <div class="section">
+    <div class="card card-success">
+      <h3>🎯 Главное из урока</h3>
+      <p><strong>Проверка с зубами — это спор, а не оценка.</strong> Строитель производит, оппонент охотится на поломку без права соглашаться; человек читает только разногласия. За здоровьем оппонента следят долей блокировок — иначе это второй счёт за украшение. А для «творческого» у машины всё равно найдутся метрики — и они становятся условием остановки.</p>
+    </div>
+    <div class="card">
+      <p style="color: var(--muted); font-size: 0.85rem;">📚 По мотивам главы 21 книги «Hands-on AI Agents» (Antonio Gulli) — репозиторий <code>agulli/atlas-agents</code>, используется с разрешения автора; код и примеры адаптированы.</p>
+    </div>
+  </div>
+
+  <div class="nav-footer">
+    <a href="../05-always-on/index.html" class="nav-btn">← Предыдущий урок</a>
+    <a href="../05-learn-command/index.html" class="nav-btn primary">Следующий урок →</a>
+  </div>
+
+</article>
+<footer>
+  <div class="container">
+    <p>© 2026 Artur A. · ИИ-агенты на практике</p>
+  </div>
+</footer>
+
+<script>
+function checkAnswer(element, isCorrect) {
+  const card = element.closest('.card');
+  const options = card.querySelectorAll('.quiz-option');
+  const resultDiv = card.querySelector('.result');
+  if (isCorrect) {
+    options.forEach(opt => {
+      opt.style.pointerEvents = 'none';
+      if (opt === element) opt.classList.add('correct');
+      else opt.classList.add('disabled');
+    });
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(16,185,129,0.1)';
+    resultDiv.style.border = '1px solid var(--success)';
+    resultDiv.innerHTML = '<strong>✅ Правильно!</strong>';
+  } else {
+    element.classList.add('wrong');
+    element.style.pointerEvents = 'none';
+    resultDiv.classList.add('show');
+    resultDiv.style.background = 'rgba(245,158,11,0.1)';
+    resultDiv.style.border = '1px solid var(--warning)';
+    resultDiv.innerHTML = '<strong>⚠️ Не совсем. Попробуйте другой вариант.</strong>';
+  }
+}
+</script>
+
+</body>
+</html>
